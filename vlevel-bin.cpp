@@ -251,8 +251,28 @@ int main(int argc, char *argv[])
        << "channels: " << channels << endl
        << "strength: " << strength << endl
        << "max_multiplier: " << max_multiplier << endl;
+
+  FILE *in = stdin;
+  FILE *out = stdout;
+
+  argument = cmd.GetArgument();
+  if(!argument.empty() && argument != "-") {
+    in = fopen(argument.c_str(), "rb");
+    if(!in) {
+      cerr << "Couldn't open input file '" << argument << "'.\n" << endl;
+      return 2;
+    }
+  }
+  argument = cmd.GetArgument();
+  if(!argument.empty() && argument != "-") {
+    out = fopen(argument.c_str(), "wb");
+    if(!in) {
+      cerr << "Couldn't open output file '" << argument << "'.\n" << endl;
+      return 2;
+    }
+  }
   
   VolumeLeveler l(length, channels, strength, max_multiplier);
-  LevelRaw(stdin, stdout, l, 16);
+  LevelRaw(in, out, l, 16);
   return 0;
 }
