@@ -20,13 +20,26 @@
 # User-editable options:
 
 # Change this to suit your preferences (maybe add -march=cputype)	
-export CXXFLAGS = -Wall -O2 -fPIC -DPIC -g -march=pentium4
+
+# This is what works fastest with GCC on my system
+#
+# I'd be interested to see how setting -DEXPECT impacts performance -
+# on my system, it makes it a bit worse.
+
+export CXXFLAGS = -Wall -O3 -fPIC -DPIC -g -march=pentium4
+
+# On my system, ICC is quite a bit faster, with these options:
+#export CC=icc
+#export CXX=icc
+#export LD=icc
+#export CXXFLAGS = -fPIC -DPIC -g  -O3 -rcd
 
 # This is where it will be installed
 export PREFIX = /usr/local/
 export LADSPA_PATH = $(PREFIX)/lib/ladspa/
 
 # End of user-editable options.
+
 
 # Note: this probably isn't the best way to have one makefile for
 # source in several directories.  Someday I'll figure out automake.

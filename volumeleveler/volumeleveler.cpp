@@ -22,7 +22,6 @@
 #include <sys/types.h>
 #include <assert.h>
 #include <math.h>
-#include <iostream>
 
 #include "volumeleveler.h"
 
@@ -127,7 +126,7 @@ void VolumeLeveler::Exchange_n(value_t **in_bufs, value_t **out_bufs, size_t in_
 		// samples will scale to Inf or NaN.  This causes a tick on the
 		// first sample after a Flush() unless max_multiplier is not Inf.
 		// hopefully this fix isn't too slow.
-		if(avg_amp <= 0) multiplier = 0;
+		if(unlikely(avg_amp <= 0)) multiplier = 0;
 
 		// untested!
 		// The advantage of using floats is that you can be
@@ -135,11 +134,11 @@ void VolumeLeveler::Exchange_n(value_t **in_bufs, value_t **out_bufs, size_t in_
 		// average_amp calculation, let's apply it to limit
 		// the audio to varying normally below 1.  Again,
 		// hopefully this won't slow things down too much.
-		if(avg_amp > 1) multiplier = 1 / avg_amp;
+		if(unlikely(avg_amp > 1)) multiplier = 1 / avg_amp;
 		
 		// limit multiplier to max_multiplier.  max_multiplier can be Inf
 		// to disable this.
-		if(multiplier > max_multiplier) multiplier = max_multiplier;
+		if(unlikely(multiplier > max_multiplier)) multiplier = max_multiplier;
 		
 		// swap buf[pos] with user_buf[user_pos], scaling user[buf] by
 		// multiplier and finding max of the new sample
@@ -148,14 +147,14 @@ void VolumeLeveler::Exchange_n(value_t **in_bufs, value_t **out_bufs, size_t in_
 			value_t in = in_bufs[ch][user_pos];
 			out_bufs[ch][user_pos] = bufs[ch][pos] * multiplier;
 			bufs[ch][pos] = in;
-			if(VLEVEL_ABS(in) > new_val) new_val = fabs(in);
+			if(VLEVEL_ABS(in) > new_val) new_val = VLEVEL_ABS(in);
 		}
 		
 		pos = (pos + 1) % samples; // now pos is the oldest, new one is pos-1
 		
 		avg_amp += max_slope;
 		
-		if(pos == max_slope_pos) {
+		if(unlikely(pos == max_slope_pos)) {
 			// recompute (this is expensive)
 			max_slope = -HUGE_VAL;
 			for(size_t i = 1; i < samples; ++i) {
@@ -166,7 +165,9 @@ void VolumeLeveler::Exchange_n(value_t **in_bufs, value_t **out_bufs, size_t in_
 				}
 				value_t slope = (sample_val - avg_amp) / i;
 				// must be >=, otherwise clipping causes excessive computation
-				if(slope >= max_slope) { 
+				// TODO: maybe optimize - just save i, then compute slope, pos, and val only once later.
+				// maybe unlikely()
+				if(unlikely(slope >= max_slope)) { 
 					max_slope_pos = (pos + i) % samples;
 					max_slope = slope;
 					max_slope_val = sample_val;
@@ -182,7 +183,8 @@ void VolumeLeveler::Exchange_n(value_t **in_bufs, value_t **out_bufs, size_t in_
 			value_t slope = (new_val - avg_amp) / (samples - 1);
 
 			// probably needs to be >= for same reason as above
-			if(slope >= max_slope) {
+			// maybe unlikely()
+			if(unlikely(slope >= max_slope)) {
 				max_slope_pos = (pos - 1) % samples;
 				max_slope = slope;
 				max_slope_val = new_val;

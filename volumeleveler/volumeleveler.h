@@ -38,6 +38,28 @@ typedef float value_t;
 // a bit faster on 2.96, a bit slower(!) on 3.2
 //#define VLEVEL_ABS(x) (x)
 
+// TODO: VLEVEL_MAX? or maybe that's not worth it
+
+
+// Branch Prediction:
+//
+// NOTE: for some strange reason, doing nothing is fastest, my
+// hand-tuned unlikely() macros is slightly slower, and letting
+// -fprofile-arcs and -fbranch-probabilities help the optimization is
+// slowest yet.  This is the exact opposite of what I'd expect.  Hmm.
+// I wish somebody would optimize GCC up to the speed of ICC.
+//
+// XXX: should be only for GCC versions that support this:
+// taken from linux/include/linux/compiler.h
+#ifdef EXPECT
+#warning using tweaks
+#define likely(x)       __builtin_expect(!!(x), 1)
+#define unlikely(x)     __builtin_expect(!!(x), 0)
+#else
+#define likely(x) (x)
+#define unlikely(x) (x)
+#endif
+
 // Converts from an integer format to value_t
 // values is the number of values in out, in needs values*bits/8 bytes.
 void ToValues(char *in, value_t *out, size_t values,

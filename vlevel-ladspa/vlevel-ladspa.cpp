@@ -19,8 +19,6 @@
 
 // vlevel-ladspa.cpp - the ladspa plugin
 
-#include <iostream>
-
 #include "../volumeleveler/volumeleveler.h"
 #include "ladspa.h"
 #include "vlevel-ladspa.h"
