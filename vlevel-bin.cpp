@@ -1,5 +1,5 @@
 // Tom Felker
-// main.cpp - the vlevel command, uses VolumeLeveler
+// vlevel-bin.cpp - the vlevel-bin command, uses VolumeLeveler
 
 #include <iostream>
 #include <fstream>
