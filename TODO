@@ -6,3 +6,4 @@ Optimize for mono and stereo special cases
 
 Cool FXRuby GUI with SOX
 
+Rememember: when updating version, change in docs, readme, and vlevel-bin.cpp

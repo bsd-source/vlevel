@@ -165,7 +165,7 @@ void LevelRaw(FILE *in, FILE *out, VolumeLeveler &vl, unsigned int bits_per_valu
 
 void Help()
 {
-  cerr << "VLevel v0.3" << endl
+  cerr << "VLevel v0.5" << endl
        << endl
        << "usage:" << endl
        << "\tvlevel-bin [options] < infile > outfile" << endl
