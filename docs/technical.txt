@@ -67,7 +67,37 @@ Math
 
   output_sample = sample * avg_amp ^ (-strength)
 
-  I derived this a long time ago, based on percieved value being
-  logarithmic, but I have since forgotten the specifics.  I'm asking
-  on some audio newsgrouops to see if this is the best way, it's
-  easily changable.
+  This is derived as follows:
+
+  First, we convert the amplitude of avg_amp to decibels (1 = 0dB):
+
+  avg_amp_db = 10 * log10(avg_amp)
+
+  avg_amp_db is less than zero.  We want to scale it to be closer to
+  zero, in such a way that if strength is 1, it will become zero, and
+  if strength is 0 it will remain unchanged.
+
+  ideal_amp_db = avg_amp_db * (1 - strength)
+  ideal_amp_db = 10 * log10(avg_amp) * (1 - strength)
+
+  Now we convert back to samples:
+
+  ideal_amp = 10 ^ (ideal_amp_db / 10)
+  ideal_amp = 10 ^ (log10(avg_amp) * (1 - strength))
+  ideal_amp = (10 ^ log10(avg_amp)) ^ (1 - strength)
+  ideal_amp = avg_amp ^ (1 - strength)
+
+  Now we find out what we should multiply the samples by to change
+  their peak amplitude, avg_amp, to their ideal peak amplitude,
+  ideal_amp:
+
+  multiplier = ideal_amp / avg_amp
+  multiplier = avg_amp ^ (1 - strength) / avg_amp
+  multiplier = avg_amp ^ (-strength)
+
+  And finally, we multiply the sample by the multiplier:
+
+  output_sample = sample * multiplier
+  output_sample = sample * avg_amp ^ (-strength)
+
+  
