@@ -94,8 +94,8 @@ void LevelRaw(istream &in, ostream& out, VolumeLeveler &vl, unsigned int bits_pe
     ToValues(raw_buf, raw_value_buf, good_values, bits_per_value);
 
     // de-interleave the data
-    for(size_t ch = 0; ch < channels; ++ch)
-      for(size_t s = 0; s < good_samples; ++s)
+    for(size_t s = 0; s < good_samples; ++s)
+      for(size_t ch = 0; ch < channels; ++ch)
 	bufs[ch][s] = raw_value_buf[s * channels + ch];
     
     // do the exchange
@@ -105,8 +105,8 @@ void LevelRaw(istream &in, ostream& out, VolumeLeveler &vl, unsigned int bits_pe
     good_values -= silence_values;
 
     // interleave the data
-    for(size_t ch = 0; ch < channels; ++ch)
-      for(size_t s = silence_samples; s < silence_samples + good_samples; ++s)
+    for(size_t s = silence_samples; s < silence_samples + good_samples; ++s)
+      for(size_t ch = 0; ch < channels; ++ch)
 	raw_value_buf[s * channels + ch] = bufs[ch][s];
     
     // write the data
@@ -115,8 +115,8 @@ void LevelRaw(istream &in, ostream& out, VolumeLeveler &vl, unsigned int bits_pe
   }
 
   // silence the data
-  for(size_t ch = 0; ch < channels; ++ch)
-    for(size_t s = 0; s < samples; ++s)
+  for(size_t s = 0; s < samples; ++s)
+    for(size_t ch = 0; ch < channels; ++ch)
       bufs[ch][s] = 0;
   
   // exchange the data, 
@@ -126,9 +126,9 @@ void LevelRaw(istream &in, ostream& out, VolumeLeveler &vl, unsigned int bits_pe
   good_values = values - silence_values;
 
   //interlace
-  for(size_t ch = 0; ch < channels; ++ch)
-    for(size_t s = silence_samples; s < samples; ++s)
-	raw_value_buf[s * channels + ch] = bufs[ch][s];
+  for(size_t s = silence_samples; s < samples; ++s)
+    for(size_t ch = 0; ch < channels; ++ch)
+      raw_value_buf[s * channels + ch] = bufs[ch][s];
     
   FromValues(&raw_value_buf[silence_values], raw_buf, good_values, bits_per_value);
   out.write(raw_buf, good_values * bytes_per_value);
