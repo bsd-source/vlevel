@@ -34,7 +34,7 @@ using namespace std;
 void ToDouble(char *in, double *out, size_t values, unsigned int bits_per_value);
 void FromDouble(double *in, char *out, size_t values, unsigned int bits_per_value);
 void LevelRaw(istream &in, ostream& out, VolumeLeveler &vl, unsigned int bits_per_value);
-void Usage();
+void Help();
 
 // len is num of values, in needs len*bits/8 chars
 void ToDouble(char *in, double *out, size_t values, unsigned int bits_per_value)
@@ -95,9 +95,26 @@ void LevelRaw(istream &in, ostream& out, VolumeLeveler &vl, unsigned int bits_pe
   
 }
 
-void Usage()
+void Help()
 {
-  cerr << "Perhaps at some point this will be documented." << endl;
+  cerr << "VLevel v0.3" << endl
+       << endl
+       << "usage:" << endl
+       << "\tvlevel-bin [options] < infile > outfile" << endl
+       << endl
+       << "options: (abbreviations also work)" << endl
+       << "\t--length num" << endl
+       << "\t\tSets the buffer to num samples long" << endl
+       << "\t\tDefault is 132300 (three seconds at 44.1kHz)" << endl
+       << "\t--channels num" << endl
+       << "\t\tEach sample has num channels" << endl
+       << "\t\tDefault is 2" << endl
+       << "\t--strength num" << endl
+       << "\t\tEffect strength, 1 is max, 0 is no effect." << endl
+       << "\t\tDefault is .8" << endl
+       << "\t--max-multiplier num" << endl
+       << "\t\tSets the maximum amount a sample will be multiplied" << endl
+       << "\t\tDefault is 20" << endl;
 }
 
 int main(int argc, char *argv[])
@@ -105,7 +122,7 @@ int main(int argc, char *argv[])
   CommandLine cmd(argc, argv);
   size_t length = 3 * 44100;
   size_t channels = 2;
-  double strength = .8, max_multiplier = 15;
+  double strength = .8, max_multiplier = 20;
   string infile, outfile, option, argument;
   
   while(option = cmd.GetOption(), !option.empty()) {
@@ -131,11 +148,11 @@ int main(int argc, char *argv[])
         return 2;
       }
     } else if(option == "help" || option == "h") {
-      Usage();
+      Help();
       return 0;
     } else {
       cerr << cmd.GetProgramName() << ": unrecognized option " << option << endl;
-      Usage();
+      Help();
       return 2;
     }
   }

@@ -29,7 +29,7 @@ PREFIX=/usr/local/bin
 
 all: vlevel-bin
 
-vlevel-bin: vlevel-bin.o volumeleveler.o commandline.o
+vlevel-bin: volumeleveler.o commandline.o vlevel-bin.o	
 	$(CXX) $(CXXFLAGS) -o vlevel-bin vlevel-bin.o volumeleveler.o commandline.o
 
 volumeleveler.o: volumeleveler.cpp volumeleveler.h

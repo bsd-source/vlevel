@@ -61,3 +61,13 @@ General Idea
   next section.
 
 Math
+
+  Once we have avg_amp, each sample is scaled when it is output
+  according to this:
+
+  output_sample = sample * avg_amp ^ (-strength)
+
+  I derived this a long time ago, based on percieved value being
+  logarithmic, but I have since forgotten the specifics.  I'm asking
+  on some audio newsgrouops to see if this is the best way, it's
+  easily changable.
