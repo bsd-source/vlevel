@@ -27,17 +27,20 @@
 
 typedef LADSPA_Data value_t;
 
-#define PORT_COUNT 7
+#define PORT_COUNT 8
 
 #define PORT_CONTROL_LOOK_AHEAD 0
 #define PORT_CONTROL_STRENGTH 1
 #define PORT_CONTROL_USE_MAX_MULTIPLIER 2
 #define PORT_CONTROL_MAX_MULTIPLIER 3
 #define PORT_CONTROL_UNDO 4
-#define PORT_INPUT1 5
-#define PORT_OUTPUT1 6
-//#define PORT_INPUT2 7
-//#define PORT_OUTPUT2 8
+#define PORT_OUTPUT_MULTIPLIER 5
+#define PORT_INPUT1 6
+#define PORT_OUTPUT1 7
+
+// TODO: native stereo support
+//#define PORT_INPUT2 8
+//#define PORT_OUTPUT2 9
 
 struct VLevelInstance {
   VLevelInstance(): vl(2, 1) {}

@@ -22,7 +22,7 @@
 # CXX=g++-2.96
 #
 # Change this to suite your preferences (maybe add -march=cputype)	
-CXXFLAGS=-Wall -O3 -fPIC -DPIC
+CXXFLAGS=-Wall -O3 -fPIC -DPIC -g
 #
 # This is where it will be installed
 PREFIX=/usr/local/bin

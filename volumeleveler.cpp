@@ -85,6 +85,13 @@ void VolumeLeveler::Flush()
   max_slope = max_slope_val = avg_amp = 0;
 }
 
+value_t VolumeLeveler::GetMultiplier()
+{
+  value_t multiplier = pow(avg_amp, -strength);
+  if(multiplier > max_multiplier) multiplier = max_multiplier;
+  return multiplier;
+}
+
 size_t VolumeLeveler::Exchange(value_t **in_bufs, value_t **out_bufs, size_t in_samples)
 {
   switch(channels) {

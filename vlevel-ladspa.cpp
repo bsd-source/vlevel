@@ -37,8 +37,9 @@ LADSPA_PortDescriptor vlevel_port_descriptors[] = {
   LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL,
   LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL,
   LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL,
+  LADSPA_PORT_OUTPUT | LADSPA_PORT_CONTROL,
   LADSPA_PORT_INPUT | LADSPA_PORT_AUDIO,
-  LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO  
+  LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO
 };
 
 char *vlevel_port_names[] = {
@@ -47,6 +48,7 @@ char *vlevel_port_names[] = {
   "Use Maximum Multiplier",
   "Maximum Multiplier",
   "Undo",
+  "Current Multiplier",
   "Input",
   "Output"
 };
@@ -72,12 +74,16 @@ LADSPA_PortRangeHint vlevel_port_range_hints[] = {
   {
     LADSPA_HINT_BOUNDED_BELOW | LADSPA_HINT_BOUNDED_ABOVE |
     LADSPA_HINT_DEFAULT_MIDDLE,
-    0, 50    
+    0, 20    
   },
   {
     LADSPA_HINT_TOGGLED |
     LADSPA_HINT_DEFAULT_0,
     0, 0
+  },
+  {
+    LADSPA_HINT_BOUNDED_BELOW | LADSPA_HINT_BOUNDED_ABOVE,
+    0, 20  
   },
   { 0, 0, 0 },
   { 0, 0, 0 }  
@@ -97,7 +103,7 @@ LADSPA_Descriptor vlevel_descriptor = {
   // Copyright
   "GPL",
   // PortCount
-  7,
+  PORT_COUNT,
   // PortDescriptors
   vlevel_port_descriptors,
   // PortNames
@@ -175,6 +181,7 @@ void Run(LADSPA_Handle instance, unsigned long sample_count)
 
   pvli->vl.Exchange(&pvli->ports[PORT_INPUT1], &pvli->ports[PORT_OUTPUT1], sample_count);
   
+  *pvli->ports[PORT_OUTPUT_MULTIPLIER] = pvli->vl.GetMultiplier();
 }
 
 void Deactivate(LADSPA_Handle instance){}

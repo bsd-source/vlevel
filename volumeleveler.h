@@ -58,6 +58,7 @@ public:
   inline size_t GetSilence() { return silence; };
 
   // get stats
+  value_t GetMultiplier(); 
   
   // fills the buffers with silence
   void Flush();
