@@ -2,11 +2,22 @@
 // main.cpp - the vlevel command, uses VolumeLeveler
 
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+
 #include <limits.h>
+#include <assert.h>
 
 #include "volumeleveler.h"
+#include "commandline.h"
 
 using namespace std;
+
+void ToDouble(char *in, double *out, size_t values, unsigned int bits_per_value);
+void FromDouble(double *in, char *out, size_t values, unsigned int bits_per_value);
+void LevelRaw(istream &in, ostream& out, VolumeLeveler &vl, unsigned int bits_per_value);
+void Usage();
 
 // len is num of values, in needs len*bits/8 chars
 void ToDouble(char *in, double *out, size_t values, unsigned int bits_per_value)
@@ -67,12 +78,58 @@ void LevelRaw(istream &in, ostream& out, VolumeLeveler &vl, unsigned int bits_pe
   
 }
 
-
-
-int main()
+void Usage()
 {
-  VolumeLeveler l;
-  l.SetStrength(.9);
+  cerr << "Perhaps at some point this will be documented." << endl;
+}
+
+int main(int argc, char *argv[])
+{
+  CommandLine cmd(argc, argv);
+  size_t length = 3 * 44100;
+  size_t channels = 2;
+  double strength = .8, max_multiplier = 15;
+  string infile, outfile, option, argument;
+  
+  while(option = cmd.GetOption(), !option.empty()) {
+    
+    if(option == "length" || option == "l") {
+      if((istringstream(cmd.GetArgument()) >> length).fail()) {
+        cerr << cmd.GetProgramName() << ": bad or no option for --length" << endl;
+        return 2;
+      }
+    } else if(option == "channels" || option == "c") {
+      if((istringstream(cmd.GetArgument()) >> channels).fail()) {
+        cerr << cmd.GetProgramName() << ": bad or no option for --channels" << endl;
+        return 2;
+      }
+    } else if(option == "strength" || option == "s") {
+      if((istringstream(cmd.GetArgument()) >> strength).fail()) {
+        cerr << cmd.GetProgramName() << ": bad or no option for --strength" << endl;
+        return 2;
+      }
+    } else if(option == "max-multiplier" || option == "m") {
+      if((istringstream(cmd.GetArgument()) >> max_multiplier).fail()) {
+        cerr << cmd.GetProgramName() << ": bad or no option for --max-multiplier" << endl;
+        return 2;
+      }
+    } else if(option == "help" || option == "h") {
+      Usage();
+      return 0;
+    } else {
+      cerr << cmd.GetProgramName() << ": unrecognized option " << option << endl;
+      Usage();
+      return 2;
+    }
+  }
+  
+  cerr << "Beginning VLevel with:" << endl
+       << "length: " << length << endl
+       << "channels: " << channels << endl
+       << "strength: " << strength << endl
+       << "max_multiplier: " << max_multiplier << endl;
+  
+  VolumeLeveler l(length, channels, strength, max_multiplier);
   LevelRaw(cin, cout, l, 16);
   return 0;
 }
