@@ -21,18 +21,14 @@ How do I use VLevel?
 
   There are options to control the length of the look-ahead buffer,
   the strength of the effect, and the maximum amplification, as well
-  as the format of the raw data.
+  as the format of the raw data.  Type "vlevel-bin --help" for
+  details.
 
 What other features are planed?
 
-  Release 0.4 will include a script to construct these pipelines for
-  you, so that you can do:
-
-  vlevel --output out.flac in.wav
-  vlevel --output-format vorbis *.wav
-
-  A future version may include XMMS (or other) plugins.  I think it's
-  better to do VLeveling on the fly.
+  The next step is a LADSPA plugin.  This will allow VLevel to plug
+  into XMMS, some command line tools, some audio editors, and any
+  other LADSPA plugin.
 
 Can I distribute VLevel?
 
