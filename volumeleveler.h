@@ -64,21 +64,21 @@ public:
 
   // replaces raw with processed, returns how many samples are
   // residual silence from when the buffers were empty.
-  size_t Exchange(value_t *in_buf, value_t *out_buf, size_t in_samples);
+  size_t Exchange(value_t **in_buf, value_t **out_buf, size_t in_samples);
   
 private:
 
-  //void Exchange_1(value_t *in_buf, value_t *out_buf, size_t in_samples);
-  //void Exchange_2(value_t *in_buf, value_t *out_buf, size_t in_samples);
-  void Exchange_n(value_t *in_buf, value_t *out_buf, size_t in_samples);
+  //void Exchange_1(value_t **in_buf, value_t **out_buf, size_t in_samples);
+  //void Exchange_2(value_t **in_buf, value_t **out_buf, size_t in_samples);
+  void Exchange_n(value_t **in_buf, value_t **out_buf, size_t in_samples);
 
   // the buffer
-  value_t *buf;
+  value_t **bufs;
   
-  // the length of the buffer (samples)
+  // the length of the buffers
   size_t samples;
 
-  // the number of atoms per channel
+  // the number of channels
   size_t channels;
     
   // the strength of the effect (between 0 and 1)

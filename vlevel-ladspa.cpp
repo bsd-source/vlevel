@@ -173,7 +173,7 @@ void Run(LADSPA_Handle instance, unsigned long sample_count)
     pvli->vl.SetStrength(strength / (strength - 1));
   }  
 
-  pvli->vl.Exchange(pvli->ports[PORT_INPUT1], pvli->ports[PORT_OUTPUT1], sample_count);
+  pvli->vl.Exchange(&pvli->ports[PORT_INPUT1], &pvli->ports[PORT_OUTPUT1], sample_count);
   
 }
 
