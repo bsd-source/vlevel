@@ -34,13 +34,11 @@ VolumeLeveler::VolumeLeveler(size_t l, size_t c,  value_t s, value_t m)
   SetSamplesAndChannels(l, c);
   SetStrength(s);
   SetMaxMultiplier(m);
-  cerr << "hi" << endl;
 }
 
 VolumeLeveler::~VolumeLeveler()
 {
   delete [] buf;
-  cerr << "bye" << endl;
 }
 
 void VolumeLeveler::SetStrength(value_t s)
