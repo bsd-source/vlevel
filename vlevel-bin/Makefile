@@ -17,6 +17,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
+# This is evil, but it makes implicit link rules use g++, not gcc
+CC = $(CXX)
+
 .PHONY: all
 all: vlevel-bin
 
@@ -39,7 +42,6 @@ clean:
 ../volumeleveler/volumeleveler.o:
 	make -C ../volumeleveler all
 
-	
 vlevel-bin: vlevel-bin.o \
             commandline.o \
             ../volumeleveler/volumeleveler.o
