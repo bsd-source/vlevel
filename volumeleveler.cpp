@@ -143,7 +143,7 @@ size_t VolumeLeveler::Exchange(double *user_buf, size_t user_samples)
       double slope = (new_val - avg_amp) / (samples - 1);
       
       if(slope >= max_slope) { // probably needs to be >= for same reason as above
-	max_slope_pos = pos;
+	max_slope_pos = (pos - 1) % samples;
 	max_slope = slope;
 	max_slope_val = new_val;
       }

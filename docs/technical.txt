@@ -1,0 +1,63 @@
+VLevel 0.3 technical.txt
+
+This is an outline of how VLevel works, which will hopefully be useful
+to anyone who helps develop it.
+
+Code Layout
+
+  The core of VLevel is the VolumeLeveler class.  It contains the
+  look-ahead buffer.  It works on blocks of double-precision numbers,
+  called values.  Some number (channels) of values makes up a sample.
+  Many of VolumeLeveler's functions take lengths in samples instead of
+  values, so be careful.
+
+  vlevel-bin drives the VolumeLeveler class, and also uses CommandLine
+  to parse it's options.
+
+  Soon, there will be a script in ruby that makes Ogg, FLAC, and wav
+  files work.
+
+General Idea
+
+  The intent is to make the quiet parts louder.  This is done by
+  computing the volume at each point, then scaling it as described in
+  the Math section.  The complex part is finding out what the volume
+  is at each point (VolumeLeveler::avg_amp).  It must vary smoothly so
+  the volume changes aren't obvious, but it must always be above the
+  peaks of the waveform, or clipping could occur.
+
+  To do this, there is a fifo buffer.  Imagine a graph of position
+  vs. amplitude showing the contents of the buffer.  A horizontal line
+  is drawn across it, representing VolumeLeveler::avg_amp.  From where
+  avg_amp crosses the y-axis, a line is drawn with the maximum
+  possible slope to intercept one of the amplitude points.  This line
+  which is as steep as possible, is the smooth line that avg_amp will
+  follow.
+
+  When the value at the head of the buffer is removed, it is scaled
+  based on avg_amp.  avg_amp is then incremented by the slope of the
+  line.  If we reach the point the line was drawn to (max_slope_pos),
+  we search the fifo for the next point of highest slope.  Otherwise,
+  we only need to check the incoming sample to see if a line drawn to
+  it has the highest slope.
+
+    y                       y (a few samples later)
+
+    ^       ^               ^
+    |      / max_slope      |
+    |     /                 |
+    |    /s                 |s\---------- avg_amp
+    |   / s                 |s \
+    |  /  s                 |s  \ max_slope
+    | /   s s               |s s \
+    |--s-ss-s----avg_amp    |s s  \
+    | ss ss s s             |s s ss
+    |ssssssssss             |ssssss
+    +------------> x        +---------> x
+   
+  Sorry for the ASCII art.  The result is that the average amplitude
+  (avg_amp) varies slowly and always stays above the amplitude of each
+  sample.  When the samples are removed, they are scaled based on the
+  next section.
+
+Math

@@ -16,8 +16,16 @@
 # along with VLevel; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-# CXX=g++-2.96 #faster, for some reason.
+# User-editable options:
+#
+# Using this version is faster, for some reason
+# CXX=g++-2.96
+#
+# Change this to suite your preferences (maybe add -march=cputype)	
 CXXFLAGS=-Wall -O3
+#
+# This is where it will be installed
+PREFIX=/usr/local/bin
 
 all: vlevel-bin
 
@@ -35,3 +43,6 @@ commandline.o: commandline.cpp commandline.h
 
 clean:
 	rm -f *.o vlevel-bin
+
+install: all
+	cp -f vlevel-bin $(PREFIX)
