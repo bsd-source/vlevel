@@ -128,6 +128,14 @@ void VolumeLeveler::Exchange_n(value_t **in_bufs, value_t **out_bufs, size_t in_
 		// first sample after a Flush() unless max_multiplier is not Inf.
 		// hopefully this fix isn't too slow.
 		if(avg_amp <= 0) multiplier = 0;
+
+		// untested!
+		// The advantage of using floats is that you can be
+		// sloppy with going over 1.  Since we have this nifty
+		// average_amp calculation, let's apply it to limit
+		// the audio to varying normally below 1.  Again,
+		// hopefully this won't slow things down too much.
+		if(avg_amp > 1) multiplier = 1 / avg_amp;
 		
 		// limit multiplier to max_multiplier.  max_multiplier can be Inf
 		// to disable this.
