@@ -48,13 +48,15 @@ void LevelRaw(FILE *in, FILE *out, VolumeLeveler &vl, unsigned int bits_per_valu
 	size_t bytes_per_value = bits_per_value / 8;
 	size_t bytes = values * bytes_per_value;
 
+	size_t s, ch; // VC++ 5.0's scoping rules are wrong, oh well.
+
 	// allocate our interleaved buffers
 	char *raw_buf = new char[bytes];
 	value_t *raw_value_buf = new value_t[values];
 
 	// allocate our per-channel buffers
 	value_t **bufs = new value_t*[channels];
-	for(size_t ch = 0; ch < channels; ++ch)
+	for(ch = 0; ch < channels; ++ch)
 		bufs[ch] = new value_t[samples];
 
 	// how much data in the buffer is good
@@ -80,7 +82,7 @@ void LevelRaw(FILE *in, FILE *out, VolumeLeveler &vl, unsigned int bits_per_valu
 		good_values -= silence_values;
 
 		// interleave the data
-		for(size_t s = silence_samples; s < silence_samples + good_samples; ++s)
+		for(s = silence_samples; s < silence_samples + good_samples; ++s)
 			for(size_t ch = 0; ch < channels; ++ch)
 				raw_value_buf[s * channels + ch] = bufs[ch][s];
 
@@ -90,7 +92,7 @@ void LevelRaw(FILE *in, FILE *out, VolumeLeveler &vl, unsigned int bits_per_valu
 	}
 
 	// silence the data
-	for(size_t s = 0; s < samples; ++s)
+	for(s = 0; s < samples; ++s)
 		for(size_t ch = 0; ch < channels; ++ch)
 			bufs[ch][s] = 0;
 
@@ -101,7 +103,7 @@ void LevelRaw(FILE *in, FILE *out, VolumeLeveler &vl, unsigned int bits_per_valu
 	good_values = values - silence_values;
 
 	//interlace
-	for(size_t s = silence_samples; s < samples; ++s)
+	for(s = silence_samples; s < samples; ++s)
 		for(size_t ch = 0; ch < channels; ++ch)
 			raw_value_buf[s * channels + ch] = bufs[ch][s];
 
@@ -110,7 +112,7 @@ void LevelRaw(FILE *in, FILE *out, VolumeLeveler &vl, unsigned int bits_per_valu
 
 	delete [] raw_buf;
 	delete [] raw_value_buf;
-	for(size_t ch = 0; ch < channels; ++ch)
+	for(ch = 0; ch < channels; ++ch)
 		delete [] bufs[ch];
 	delete [] bufs;
 
