@@ -81,7 +81,7 @@ LADSPA_PortRangeHint vlevel_port_range_hints[] = {
 
 LADSPA_Descriptor vlevel_descriptor = {
   // UniqueID
-  666,
+  1981,
   // Label
   "vlevel",
   // Properties
@@ -167,7 +167,7 @@ void Run(LADSPA_Handle instance, unsigned long sample_count)
   if(*pvli->ports[PORT_CONTROL_UNDO] > 0) {
     value_t strength = pvli->vl.GetStrength();
     pvli->vl.SetStrength(strength / (strength - 1));
-  }
+  }  
 
   pvli->vl.Exchange(pvli->ports[PORT_INPUT1], pvli->ports[PORT_OUTPUT1], sample_count);
   
