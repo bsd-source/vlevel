@@ -50,4 +50,3 @@ vlevel-ladspa.o: vlevel-ladspa.cpp \
                  vlevel-ladspa.h \
                  ladspa.h \
                  ../volumeleveler/volumeleveler.h \
-                 ../volumeleveler/vlevel.h

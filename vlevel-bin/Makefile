@@ -49,6 +49,5 @@ vlevel-bin: vlevel-bin.o \
 vlevel-bin.o: vlevel-bin.cpp \
               commandline.h \
               ../volumeleveler/volumeleveler.h \
-              ../volumeleveler/vlevel.h
 
 commandline.o: commandline.cpp commandline.h

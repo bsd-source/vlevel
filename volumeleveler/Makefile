@@ -27,5 +27,5 @@ install: all
 clean:
 	-rm -f volumeleveler.o
 
-volumeleveler.o: volumeleveler.cpp volumeleveler.h vlevel.h
+volumeleveler.o: volumeleveler.cpp volumeleveler.h
 

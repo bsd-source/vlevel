@@ -28,36 +28,54 @@
 
 #include <sys/types.h>
 
-#include "vlevel.h"
+typedef float value_t;
+
+#define VLEVEL_ABS(x) fabsf(x)
+
+// same speed as above
+//#define VLEVEL_ABS(x) ((x) > 0 ? (x) : -(x))
+
+// a bit faster on 2.96, a bit slower(!) on 3.2
+//#define VLEVEL_ABS(x) (x)
+
+// Converts from an integer format to value_t
+// values is the number of values in out, in needs values*bits/8 bytes.
+void ToValues(char *in, value_t *out, size_t values,
+              size_t bits_per_value, bool has_sign);
+
+// Converts from value_t to an integer format
+// values is the number of values in in, out needs values*bits/8 bytes.
+void FromValues(value_t *in, char *out, size_t values,
+                size_t bits_per_value, bool has_sign);
 
 class VolumeLeveler {
  public:
-	
+
 	// constructs and destructs a VolumeLeveler with a length of l
 	// samples with c channels each, an effect strength of s and a
 	// maximum multiplier of m
 	VolumeLeveler(size_t l = 44100, size_t c = 2, value_t s = .8, value_t m = 25);
 	~VolumeLeveler();
-	
+
 	// Reallocates a buffer of l samples and c channels (contents are
 	// lost)
 	void SetSamplesAndChannels(size_t l, size_t c);
-	
+
 	// set and get the strength (between 0 and 1) (set doesn't affect
 	// the buffer) if undo is true, vlevel will do the exact opposite,
 	// so you can remove a vlevel.
 	void SetStrength(value_t s);
-	
+
 	// set and get the max multiplier (set doesn't affect the buffer)
 	void SetMaxMultiplier(value_t m);
-	
+
 	// get stuff
 	inline size_t GetSamples() { return samples; };
 	inline size_t GetChannels() { return channels; };
 	inline value_t GetStrength() { return strength; };
 	inline value_t GetMaxMultiplier() { return max_multiplier; };
 	inline size_t GetSilence() { return silence; };
-	
+
 	// get stats
 	value_t GetMultiplier(); 
 	

@@ -24,7 +24,6 @@
 #include <math.h>
 #include <iostream>
 
-#include "vlevel.h"
 #include "volumeleveler.h"
 
 using namespace std;
@@ -158,7 +157,8 @@ void VolumeLeveler::Exchange_n(value_t **in_bufs, value_t **out_bufs, size_t in_
 					if(ch_val > sample_val) sample_val = ch_val;
 				}
 				value_t slope = (sample_val - avg_amp) / i;
-				if(slope >= max_slope) { // must be >=, otherwise clipping causes excessive computation
+				// must be >=, otherwise clipping causes excessive computation
+				if(slope >= max_slope) { 
 					max_slope_pos = (pos + i) % samples;
 					max_slope = slope;
 					max_slope_val = sample_val;
@@ -170,15 +170,73 @@ void VolumeLeveler::Exchange_n(value_t **in_bufs, value_t **out_bufs, size_t in_
 			// recomputing max_slope isn't really necessary...
 			max_slope = (max_slope_val - avg_amp) / ((max_slope_pos - pos + samples) % samples);
 			// ...but it doesn't take long and has a small effect.
-			
+
 			value_t slope = (new_val - avg_amp) / (samples - 1);
-			
-			if(slope >= max_slope) { // probably needs to be >= for same reason as above
+
+			// probably needs to be >= for same reason as above
+			if(slope >= max_slope) {
 				max_slope_pos = (pos - 1) % samples;
 				max_slope = slope;
 				max_slope_val = new_val;
 			}
 		}
+	}
+}
+
+// this code has been proven correct, but not tested much.  ;-)
+void ToValues(char *in, value_t *out, size_t values,
+              size_t bits_per_value, bool has_sign)
+{
+	switch(bits_per_value) {
+	case 16:
+		if(has_sign) {
+			for(size_t i = 0; i < values; ++i)
+				out[i] = ((value_t)((int16_t *)in)[i]) / 32768;
+		} else {
+			for(size_t i = 0; i < values; ++i)
+				out[i] = (((value_t)((u_int16_t *)in)[i]) - 32768) / 32768;
+		}
+		break;
+	case 8:
+		if(has_sign) {
+			for(size_t i = 0; i < values; ++i)
+				out[i] = ((value_t)((int8_t *)in)[i]) / 128;
+		} else {
+			for(size_t i = 0; i < values; ++i)
+				out[i] = (((value_t)((u_int8_t *)in)[i]) - 128) / 128;
+		}
+		break;
+	default:
+		assert(false);
+	}
+}
+
+
+// note: no clipping, just wrap.  I don't know how badly clipping will perform.
+void FromValues(value_t *in, char *out, size_t values,
+                size_t bits_per_value, bool has_sign)
+{
+	switch(bits_per_value) {
+	case 16:
+		if(has_sign) {
+			for(size_t i = 0; i < values; ++i)
+				((int16_t *)out)[i] = (int16_t)(in[i] * 32767);
+		} else {
+    	for(size_t i = 0; i < values; ++i)
+				((u_int16_t *)out)[i] = (u_int16_t) (in[i] * 32767) + 32767;
+		}
+		break;
+	case 8:
+		if(has_sign) {
+			for(size_t i = 0; i < values; ++i)
+				((int8_t *)out)[i] = (int8_t)(in[i] * 127);
+		} else {
+      for(size_t i = 0; i < values; ++i)
+				((u_int8_t *)out)[i] = (u_int8_t)((in[i] * 127) + 127);
+		}
+		break;
+	default:
+		assert(false);
 	}
 }
 
