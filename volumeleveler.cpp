@@ -68,22 +68,22 @@ void VolumeLeveler::Flush()
   max_slope = max_slope_val = avg_amp = 0;
 }
 
-size_t VolumeLeveler::Exchange(value_t *user_buf, size_t user_samples)
+size_t VolumeLeveler::Exchange(value_t *in_buf, value_t *out_buf, size_t in_samples)
 {
   switch(channels) {
   //case 1:
-  //  Exchange_1(user_buf, user_samples);
+  //  Exchange_1(in_buf, out_buf, in_samples);
   //  break;
   //case 2:
-  //  Exchange_2(user_buf, user_samples);
+  //  Exchange_2(in_buf, out_buf, in_samples);
   //  break;
   default:
-    Exchange_n(user_buf, user_samples);
+    Exchange_n(in_buf, out_buf, in_samples);
   }
-
-  if(silence >= user_samples) {
-    silence -= user_samples;
-    return user_samples;
+  
+  if(silence >= in_samples) {
+    silence -= in_samples;
+    return in_samples;
   } else {
     size_t returned_silence = silence;
     silence = 0;
@@ -91,10 +91,10 @@ size_t VolumeLeveler::Exchange(value_t *user_buf, size_t user_samples)
   }
 }
 
-void VolumeLeveler::Exchange_n(value_t *user_buf, size_t user_samples)
+void VolumeLeveler::Exchange_n(value_t *in_buf, value_t *out_buf, size_t in_samples)
 {
   // for each user_pos in user_buf
-  for(size_t user_pos = 0; user_pos < user_samples; ++user_pos) {
+  for(size_t user_pos = 0; user_pos < in_samples; ++user_pos) {
     
     // compute multiplier
     value_t multiplier = pow(avg_amp, -strength);
@@ -105,9 +105,8 @@ void VolumeLeveler::Exchange_n(value_t *user_buf, size_t user_samples)
 
     value_t new_val = 0;
     for(size_t ch = 0; ch < channels; ++ch) {
-      value_t in = user_buf[user_pos * channels + ch];
-      value_t out = buf[pos * channels + ch];
-      user_buf[user_pos * channels + ch] = out * multiplier;
+      value_t in = in_buf[user_pos * channels + ch];
+      out_buf[user_pos * channels + ch] = buf[pos * channels + ch] * multiplier;
       buf[pos * channels + ch] = in;
       if(fabs(in) > new_val) new_val = fabs(in);
     }

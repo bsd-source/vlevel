@@ -53,19 +53,21 @@ public:
   inline value_t GetStrength() { return strength; };
   inline value_t GetMaxMultiplier() { return max_multiplier; };
   inline size_t GetSilence() { return silence; };
+
+  // get stats
   
   // fills the buffers with silence
   void Flush();
 
   // replaces raw with processed, returns how many samples are
   // residual silence from when the buffers were empty.
-  size_t Exchange(value_t *user_buf, size_t user_samples);
+  size_t Exchange(value_t *in_buf, value_t *out_buf, size_t in_samples);
   
 private:
 
-  //void Exchange_1(value_t *user_buf, size_t user_samples);
-  //void Exchange_2(value_t *user_buf, size_t user_samples);
-  void Exchange_n(value_t *user_buf, size_t user_samples);
+  //void Exchange_1(value_t *in_buf, value_t *out_buf, size_t in_samples);
+  //void Exchange_2(value_t *in_buf, value_t *out_buf, size_t in_samples);
+  void Exchange_n(value_t *in_buf, value_t *out_buf, size_t in_samples);
 
   // the buffer
   value_t *buf;

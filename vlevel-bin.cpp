@@ -72,27 +72,27 @@ void LevelRaw(istream &in, ostream& out, VolumeLeveler &vl, unsigned int bits_pe
   size_t bytes = values * bytes_per_value;
 
   char *raw_buf = new char[bytes];
-  value_t *value_t_buf = new value_t[values];
+  value_t *value_buf = new value_t[values];
 
   while(in) {
     in.read(raw_buf, bytes);
     size_t good_values = in.gcount() / bytes_per_value;
     size_t good_samples = good_values / channels;
-    ToValues(raw_buf, value_t_buf, good_values, bits_per_value);
-    size_t silence_samples = vl.Exchange(value_t_buf, good_samples);
+    ToValues(raw_buf, value_buf, good_values, bits_per_value);
+    size_t silence_samples = vl.Exchange(value_buf, value_buf, good_samples);
     size_t silence_values = silence_samples * channels;    
     good_values -= silence_values;
-    FromValues(&value_t_buf[silence_values], raw_buf, good_values, bits_per_value);
+    FromValues(&value_buf[silence_values], raw_buf, good_values, bits_per_value);
     out.write(raw_buf, good_values * bytes_per_value);
   }
-  for(size_t i = 0; i < values; ++i) value_t_buf[i] = 0;
-  size_t silence_samples = vl.Exchange(value_t_buf, samples);
+  for(size_t i = 0; i < values; ++i) value_buf[i] = 0;
+  size_t silence_samples = vl.Exchange(value_buf, value_buf, samples);
   size_t silence_values = silence_samples * channels;    
-  FromValues(&value_t_buf[silence_values], raw_buf, values - silence_values, bits_per_value);
+  FromValues(&value_buf[silence_values], raw_buf, values - silence_values, bits_per_value);
   out.write(raw_buf, (values - silence_values) * bytes_per_value);
   
   delete [] raw_buf;
-  delete [] value_t_buf;
+  delete [] value_buf;
   
 }
 
