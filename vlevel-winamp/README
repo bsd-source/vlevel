@@ -1,3 +1,10 @@
-Hi Markus,
-For now you can stick stuff here, and include things using relative paths.
-At some point, I should probably organize the tree better.  I'm thinking volumeleveler including the core class, with directories for each user (vlevel-bin, vlevel-ladspa, vlevel-winamp).  Commandline is a class I made to handle long options more C++'y than getopt_long, in case you're wondering.
+Hi Tom,
+
+I sent you a mail with a first very basic prototype to:
+tcfelker@mtco.com
+
+
+
+> Hi Markus,
+> For now you can stick stuff here, and include things using relative paths.
+> At some point, I should probably organize the tree better.  I'm thinking > volumeleveler including the core class, with directories for each user > (vlevel-bin, vlevel-ladspa, vlevel-winamp).  Commandline is a class I made to > handle long options more C++'y than getopt_long, in case you're wondering.
