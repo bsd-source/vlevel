@@ -231,7 +231,7 @@ void FromValues(value_t *in, char *out, size_t values,
 				((int16_t *)out)[i] = (int16_t)(in[i] * 32767);
 		} else {
     	for(size_t i = 0; i < values; ++i)
-				((u_int16_t *)out)[i] = (u_int16_t) (in[i] * 32767) + 32767;
+				((u_int16_t *)out)[i] = (u_int16_t)((in[i] * 32767) + 32767);
 		}
 		break;
 	case 8:

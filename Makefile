@@ -20,7 +20,7 @@
 # User-editable options:
 
 # Change this to suit your preferences (maybe add -march=cputype)	
-export CXXFLAGS = -Wall -O3 -fPIC -DPIC -g -march=pentium4
+export CXXFLAGS = -Wall -O2 -fPIC -DPIC -g -march=pentium4
 
 # This is where it will be installed
 export PREFIX = /usr/local/
