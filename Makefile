@@ -22,13 +22,14 @@
 CXXFLAGS=-Wall -O3 -fPIC -DPIC -g
 #
 # This is where it will be installed
-PREFIX=/usr/local/bin
-LADSPA_PREFIX=/usr/local/lib/ladspa
+PREFIX=/usr/local/bin/
+LADSPA_PREFIX=/usr/local/lib/ladspa/
 
 all: vlevel-bin vlevel-ladspa.so
 
 install: all
 	cp -f vlevel-bin $(PREFIX)
+	mkdir -p $(LADSPA_PREFIX)
 	cp -f vlevel-ladspa.so $(LADSPA_PREFIX)
 
 clean:
