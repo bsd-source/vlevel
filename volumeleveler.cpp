@@ -123,11 +123,19 @@ void VolumeLeveler::Exchange_n(value_t **in_bufs, value_t **out_bufs, size_t in_
     
     // compute multiplier
     value_t multiplier = pow(avg_amp, -strength);
+
+    // if avg_amp <= 0, then the above line sets multiplier to Inf, so
+    // samples will scale to Inf or NaN.  This causes a tick on the
+    // first sample after a Flush() unless max_multiplier is not Inf.
+    // hopefully this fix isn't too slow.
+    if(avg_amp <= 0) multiplier = 0;
+
+    // limit multiplier to max_multiplier.  max_multiplier can be Inf
+    // to disable this.
     if(multiplier > max_multiplier) multiplier = max_multiplier;
 
     // swap buf[pos] with user_buf[user_pos], scaling user[buf] by
     // multiplier and finding max of the new sample
-
     value_t new_val = 0;
     for(size_t ch = 0; ch < channels; ++ch) {
       value_t in = in_bufs[ch][user_pos];
