@@ -37,10 +37,9 @@ License:	GPL
 
 Todo
 ====
-- add conversion function to wrapper class
+- test conversion function in wrapper class
 - add config-dialog resource
 - save/restore values to/from registry(or ini) on init/quit
-- reorder project files (use ..\volumeleveler; directory structure; ...)
 - write installer/uninstaller
 - maybe skinning support?
 
@@ -48,3 +47,5 @@ Done
 ====
 - DLL framework
 - wrapper class
+- reorder project files (use ..\volumeleveler; directory structure; ...)
+

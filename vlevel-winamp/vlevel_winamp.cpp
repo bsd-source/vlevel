@@ -87,7 +87,7 @@ int init(struct winampDSPModule *this_mod)
 
 	try
 	{
-		pvlw_userData	=	new CVLWrapper(2); //get channels from somewhere
+		pvlw_userData	=	new CVLWrapper;
 		if( !pvlw_userData )
 			return 1;
 
@@ -116,11 +116,10 @@ void quit(struct winampDSPModule *this_mod)
 
 int modify_samples(struct winampDSPModule *this_mod, short int *samples, int numsamples, int bps, int nch, int srate)
 {
-	//flush cached values
-
-	//convert samples to vl-style
-	//call exchange
-	//convert vl-style to samples
-
-	return numsamples;
+	// Note - this code is untested, but it should capture the gist of things.
+	
+	assert(this_mod && this_mod->userData);
+	
+	// Exchange automatically flushes
+	return this_mod->userData->Exchange((void *)samples, numsamples, bps, nch, srate);
 }

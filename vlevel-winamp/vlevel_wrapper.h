@@ -22,31 +22,32 @@
 #ifndef INCLUDED_VLEVEL_WRAPPER_H
 #define INCLUDED_VLEVEL_WRAPPER_H
 
-#include "vlevel\\vlevel.h"
-
-//This header is the interface of the module. As people using it have no
-//need for knowledge of VolumeLeveler's internals, we just tell the compiler
-//he will find everything later. The header above is included, because if
-//someone changes value_t's definition, it should be valid here, too
-class VolumeLeveler;
-
+// This is now the only header
+// BTW, I laugh at your OS's backslashes! :-)
+#include "..\\voluemeleveler\\volumeleveler.h"
 
 //This class is a wrapper for VolumeLeveler.
 //It caches some settings and de-/interlaces
 //Exchange()'s in and output buffers
+
 class CVLWrapper
 {
 private:
-	size_t			ms_channels;
 
 //cached values
+	size_t			ms_channels;
 	size_t			ms_samples;
 	value_t			mv_strength;
 	value_t			mv_maxMultiplier;
 
+	// these don't need Changed flags, because they aren't real, but they affect ms_samples
+	value_t			mv_length; //like mv_samples, but in seconds
+	size_t			ms_rate; //used to convert length to channels
+	
 //change indicators - used for 2 reasons:
 // - comparing float values is not accurate always
 // - it is faster than comparing
+	bool			mb_channelsChanged;
 	bool			mb_samplesChanged;
 	bool			mb_strengthChanged;
 	bool			mb_maxMultiplierChanged;
@@ -54,17 +55,34 @@ private:
 //main object
 	VolumeLeveler*	mpvl_wrapped;
 public:
-	CVLWrapper( size_t s_channels=2 );
-
-	~CVLWrapper( void )	{	};
+	CVLWrapper();
+	~CVLWrapper();
 
 //these automatically mark the values as 'changed'
+	inline void SetCachedChannels( size_t channels );
 	inline void SetCachedSamples( size_t s_samples );
 	inline void SetCachedStrength( value_t v_strength );
 	inline void SetCachedMaxMultiplier( value_t v_maxMultiplier );
 
+	inline void SetCachedLength(value_t v_length);
+	inline void SetCachedRate(size_t s_rate);
+	
+//these Get functions might be useful	
+	inline size_t GetCachedChannels() { return ms_channels; };
+	inline size_t GetCachedSamples() { return ms_samples; };
+	inline value_t GetCachedStrength() { return mv_strength; };
+	inline value_t GetCachedMaxMultiplier() { return mv_maxMultiplier; };
+	
+	inline value_t GetCachedLength() { return mv_length; };
+	inline size_t GetCachedRate() { return ms_rate; };
+	
 //write cached values to the 'real' object
 	inline void CacheFlush( void );
+	
+//exchange, which handles it's own de- and re-interlacing
+//TODO: figure out what it's best to return
+	int Exchange(void *samples, int numsamples, int bps, int nch, int rate); 
+	
 };//CVLWrapper
 
 #endif//#ifndef VLEVEL_WRAPPER_H
