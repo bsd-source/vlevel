@@ -26,10 +26,16 @@
 #include "..\\volumeleveler\\volumeleveler.h"
 #include "vlevel_wrapper.h"
 
-CVLWrapper::CVLWrapper()
-	: ms_channels(2), ms_samples(44100), ms_rate(44100), mv_length(1),
-	mv_strength(0.8), mv_maxMultiplier(25),	mb_samplesChanged(false),
-	mb_strengthChanged(false), mb_maxMultiplierChanged(false), mpvl_wrapped(0)
+CVLWrapper::CVLWrapper():
+	ms_samples(44100),
+	ms_channels(2),
+	mv_strength(.8),
+	mv_maxMultiplier(25),
+	mv_length(1),
+	ms_rate(44100),
+	mb_samplesOrChannelsChanged(false),
+	mb_strengthChanged(false),
+	mb_maxMultiplierChanged(false)
 {
 	mpvl_wrapped = new VolumeLeveler(ms_samples, ms_channels, mv_strength, mv_maxMultiplier);
 	

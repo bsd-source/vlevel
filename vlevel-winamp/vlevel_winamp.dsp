@@ -109,6 +109,10 @@ SOURCE=..\volumeleveler\volumeleveler.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=\vlevel\volumeleveler\compiler.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\DSP.H
 # End Source File
 # Begin Source File

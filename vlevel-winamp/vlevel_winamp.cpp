@@ -78,7 +78,8 @@ winampDSPModule *getModule(int which)
 
 void config(struct winampDSPModule *this_mod)
 {
-	MessageBox(this_mod->hwndParent,"Hello world!",	"TestMsg",MB_OK);
+	// TODO: Code this.
+	MessageBox(this_mod->hwndParent,"Not implemented.",	"TestMsg",MB_OK);
 }
 
 int init(struct winampDSPModule *this_mod)
