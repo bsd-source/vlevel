@@ -1,5 +1,3 @@
 #!/bin/sh
 
-echo sox -r44100 -s -w -c2 $1 `basename $1 .raw`.wav
-
-sox -r44100 -s -w -c2 $1 `basename $1 .raw`.wav
+sox -raw -r44100 -s -w -c2 $1 `basename $1 .raw`.wav
