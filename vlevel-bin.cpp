@@ -137,7 +137,7 @@ void LevelRaw(istream &in, ostream& out, VolumeLeveler &vl, unsigned int bits_pe
   delete [] raw_value_buf;
   for(size_t ch = 0; ch < channels; ++ch)
     delete [] bufs[ch];
-  delete bufs;
+  delete [] bufs;
   
 /*
   while(in) {
