@@ -48,19 +48,19 @@ typedef LADSPA_Data value_t;
 
 class VLevelInstance {
  public:
-  VLevelInstance(size_t channels, unsigned long rate);
-  ~VLevelInstance();
-  void ConnectPort(unsigned long port, value_t *data_location);
-  void Activate();
-  void Run(unsigned long sample_count);
-  void Deactivate();
+	VLevelInstance(size_t channels, unsigned long rate);
+	~VLevelInstance();
+	void ConnectPort(unsigned long port, value_t *data_location);
+	void Activate();
+	void Run(unsigned long sample_count);
+	void Deactivate();
  private:
-  VolumeLeveler vl;
-  size_t nch;
-  value_t **ports;
-  value_t **in;
-  value_t **out;  
-  unsigned long sample_rate;
+	VolumeLeveler vl;
+	size_t nch;
+	value_t **ports;
+	value_t **in;
+	value_t **out;  
+	unsigned long sample_rate;
 };
 
 LADSPA_Handle Instantiate(const LADSPA_Descriptor *descriptor, unsigned long sample_rate);

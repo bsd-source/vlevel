@@ -31,82 +31,82 @@
 #include "vlevel.h"
 
 class VolumeLeveler {
-public:
-
-  // constructs and destructs a VolumeLeveler with a length of l
-  // samples with c channels each, an effect strength of s and a
-  // maximum multiplier of m
-  VolumeLeveler(size_t l = 44100, size_t c = 2, value_t s = .8, value_t m = 25);
-  ~VolumeLeveler();
-  
-  // Reallocates a buffer of l samples and c channels (contents are
-  // lost)
-  void SetSamplesAndChannels(size_t l, size_t c);
-
-  // set and get the strength (between 0 and 1) (set doesn't affect
-  // the buffer) if undo is true, vlevel will do the exact opposite,
-  // so you can remove a vlevel.
-  void SetStrength(value_t s);
-  
-  // set and get the max multiplier (set doesn't affect the buffer)
-  void SetMaxMultiplier(value_t m);
-
-  // get stuff
-  inline size_t GetSamples() { return samples; };
-  inline size_t GetChannels() { return channels; };
-  inline value_t GetStrength() { return strength; };
-  inline value_t GetMaxMultiplier() { return max_multiplier; };
-  inline size_t GetSilence() { return silence; };
-
-  // get stats
-  value_t GetMultiplier(); 
-  
-  // fills the buffers with silence
-  void Flush();
-
-  // replaces raw with processed, returns how many samples are
-  // residual silence from when the buffers were empty.
-  size_t Exchange(value_t **in_buf, value_t **out_buf, size_t in_samples);
-  
-private:
-
-  //void Exchange_1(value_t **in_buf, value_t **out_buf, size_t in_samples);
-  //void Exchange_2(value_t **in_buf, value_t **out_buf, size_t in_samples);
-  void Exchange_n(value_t **in_buf, value_t **out_buf, size_t in_samples);
-
-  // the buffer
-  value_t **bufs;
-  
-  // the length of the buffers
-  size_t samples;
-
-  // the number of channels
-  size_t channels;
-    
-  // the strength of the effect (between 0 and 1)
-  value_t strength;
-  
-  // the maximum value by which a sample will be scaled
-  value_t max_multiplier;
-  
-  // the amount of silence (data that wasn't input) left in the buffer (samples).
-  size_t silence;
-
-  // position about to be returned (samples)
-  size_t pos;
-  
-  // position of the max slope (samples)
-  size_t max_slope_pos;
-  
-  // the current "blanket" amplitude
-  value_t avg_amp;  
-  
-  // the maximum slope
-  value_t max_slope;
-
-  // the value at the maximum slope
-  value_t max_slope_val;
-  
+ public:
+	
+	// constructs and destructs a VolumeLeveler with a length of l
+	// samples with c channels each, an effect strength of s and a
+	// maximum multiplier of m
+	VolumeLeveler(size_t l = 44100, size_t c = 2, value_t s = .8, value_t m = 25);
+	~VolumeLeveler();
+	
+	// Reallocates a buffer of l samples and c channels (contents are
+	// lost)
+	void SetSamplesAndChannels(size_t l, size_t c);
+	
+	// set and get the strength (between 0 and 1) (set doesn't affect
+	// the buffer) if undo is true, vlevel will do the exact opposite,
+	// so you can remove a vlevel.
+	void SetStrength(value_t s);
+	
+	// set and get the max multiplier (set doesn't affect the buffer)
+	void SetMaxMultiplier(value_t m);
+	
+	// get stuff
+	inline size_t GetSamples() { return samples; };
+	inline size_t GetChannels() { return channels; };
+	inline value_t GetStrength() { return strength; };
+	inline value_t GetMaxMultiplier() { return max_multiplier; };
+	inline size_t GetSilence() { return silence; };
+	
+	// get stats
+	value_t GetMultiplier(); 
+	
+	// fills the buffers with silence
+	void Flush();
+	
+	// replaces raw with processed, returns how many samples are
+	// residual silence from when the buffers were empty.
+	size_t Exchange(value_t **in_buf, value_t **out_buf, size_t in_samples);
+	
+ private:
+	
+	//void Exchange_1(value_t **in_buf, value_t **out_buf, size_t in_samples);
+	//void Exchange_2(value_t **in_buf, value_t **out_buf, size_t in_samples);
+	void Exchange_n(value_t **in_buf, value_t **out_buf, size_t in_samples);
+	
+	// the buffer
+	value_t **bufs;
+	
+	// the length of the buffers
+	size_t samples;
+	
+	// the number of channels
+	size_t channels;
+	
+	// the strength of the effect (between 0 and 1)
+	value_t strength;
+	
+	// the maximum value by which a sample will be scaled
+	value_t max_multiplier;
+	
+	// the amount of silence (data that wasn't input) left in the buffer (samples).
+	size_t silence;
+	
+	// position about to be returned (samples)
+	size_t pos;
+	
+	// position of the max slope (samples)
+	size_t max_slope_pos;
+	
+	// the current "blanket" amplitude
+	value_t avg_amp;  
+	
+	// the maximum slope
+	value_t max_slope;
+	
+	// the value at the maximum slope
+	value_t max_slope_val;
+	
 };
 
 #endif // ndef VOLUMELEVELER_H
