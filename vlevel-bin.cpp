@@ -26,22 +26,23 @@
 #include <limits.h>
 #include <assert.h>
 
+#include "vlevel.h"
 #include "volumeleveler.h"
 #include "commandline.h"
 
 using namespace std;
 
-void ToDouble(char *in, double *out, size_t values, unsigned int bits_per_value);
-void FromDouble(double *in, char *out, size_t values, unsigned int bits_per_value);
+void ToValues(char *in, value_t *out, size_t values, unsigned int bits_per_value);
+void FromValues(value_t *in, char *out, size_t values, unsigned int bits_per_value);
 void LevelRaw(istream &in, ostream& out, VolumeLeveler &vl, unsigned int bits_per_value);
 void Help();
 
 // len is num of values, in needs len*bits/8 chars
-void ToDouble(char *in, double *out, size_t values, unsigned int bits_per_value)
+void ToValues(char *in, value_t *out, size_t values, unsigned int bits_per_value)
 {
   switch(bits_per_value) {
   case 16:
-    for(size_t i = 0; i < values; ++i) out[i] = (double)((short *)in)[i] / (SHRT_MAX + 1);
+    for(size_t i = 0; i < values; ++i) out[i] = (value_t)((short *)in)[i] / (SHRT_MAX + 1);
     break;
   default:
     assert(false);
@@ -49,7 +50,7 @@ void ToDouble(char *in, double *out, size_t values, unsigned int bits_per_value)
 }
 
 // len is num of samples, out needs len*bits/8 chars
-void FromDouble(double *in, char *out, size_t values, unsigned int bits_per_value)
+void FromValues(value_t *in, char *out, size_t values, unsigned int bits_per_value)
 {
   switch(bits_per_value) {
   case 16:
@@ -71,27 +72,27 @@ void LevelRaw(istream &in, ostream& out, VolumeLeveler &vl, unsigned int bits_pe
   size_t bytes = values * bytes_per_value;
 
   char *raw_buf = new char[bytes];
-  double *double_buf = new double[values];
+  value_t *value_t_buf = new value_t[values];
 
   while(in) {
     in.read(raw_buf, bytes);
     size_t good_values = in.gcount() / bytes_per_value;
     size_t good_samples = good_values / channels;
-    ToDouble(raw_buf, double_buf, good_values, bits_per_value);
-    size_t silence_samples = vl.Exchange(double_buf, good_samples);
+    ToValues(raw_buf, value_t_buf, good_values, bits_per_value);
+    size_t silence_samples = vl.Exchange(value_t_buf, good_samples);
     size_t silence_values = silence_samples * channels;    
     good_values -= silence_values;
-    FromDouble(&double_buf[silence_values], raw_buf, good_values, bits_per_value);
+    FromValues(&value_t_buf[silence_values], raw_buf, good_values, bits_per_value);
     out.write(raw_buf, good_values * bytes_per_value);
   }
-  for(size_t i = 0; i < values; ++i) double_buf[i] = 0;
-  size_t silence_samples = vl.Exchange(double_buf, samples);
+  for(size_t i = 0; i < values; ++i) value_t_buf[i] = 0;
+  size_t silence_samples = vl.Exchange(value_t_buf, samples);
   size_t silence_values = silence_samples * channels;    
-  FromDouble(&double_buf[silence_values], raw_buf, values - silence_values, bits_per_value);
+  FromValues(&value_t_buf[silence_values], raw_buf, values - silence_values, bits_per_value);
   out.write(raw_buf, (values - silence_values) * bytes_per_value);
   
   delete [] raw_buf;
-  delete [] double_buf;
+  delete [] value_t_buf;
   
 }
 
@@ -122,7 +123,7 @@ int main(int argc, char *argv[])
   CommandLine cmd(argc, argv);
   size_t length = 3 * 44100;
   size_t channels = 2;
-  double strength = .8, max_multiplier = 20;
+  value_t strength = .8, max_multiplier = 20;
   string infile, outfile, option, argument;
   
   while(option = cmd.GetOption(), !option.empty()) {

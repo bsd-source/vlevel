@@ -18,7 +18,7 @@
 
 // volumeleveler.h - declares the VolumeLeveler class
 
-// A note on terminology: atoms are indivual double values; samples
+// A note on terminology: atoms are indivual value_t values; samples
 // are one or more atoms, for example, for stereo, a sample has 2
 // atoms, and channels is 2.
 
@@ -27,30 +27,32 @@
 
 #include <sys/types.h>
 
+#include "vlevel.h"
+
 class VolumeLeveler {
 public:
 
   // constructs and destructs a VolumeLeveler with a length of l
   // samples with c channels each, an effect strength of s and a
   // maximum multiplier of m
-  VolumeLeveler(size_t l = 44100, size_t c = 2, double s = .8, double m = 25);
+  VolumeLeveler(size_t l = 44100, size_t c = 2, value_t s = .8, value_t m = 25);
   ~VolumeLeveler();
-   
+
   // Reallocates a buffer of l samples and c channels (contents are lost)
   void SetSamplesAndChannels(size_t l, size_t c);
-  
+
   // get samples and number of channels
   size_t GetSamples();
   size_t GetChannels();
 
   // set and get the strength (between 0 and 1) (set doesn't affect the buffer)
-  void SetStrength(double s);
-  double GetStrength();
-  
+  void SetStrength(value_t s);
+  value_t GetStrength();
+
   // set and get the max multiplier (set doesn't affect the buffer)
-  void SetMaxMultiplier(double m);
-  double GetMaxMultiplier();
-  
+  void SetMaxMultiplier(value_t m);
+  value_t GetMaxMultiplier();
+
   // fills the buffers with silence
   void Flush();
 
@@ -59,12 +61,12 @@ public:
 
   // replaces raw with processed, returns how many samples are
   // residual silence from when the buffers were empty.
-  size_t Exchange(double *user_buf, size_t user_samples);
+  size_t Exchange(value_t *user_buf, size_t user_samples);
   
 private:
 
   // the buffer
-  double *buf;
+  value_t *buf;
   
   // the length of the buffer (samples)
   size_t samples;
@@ -79,19 +81,19 @@ private:
   size_t max_slope_pos;
   
   // the current "blanket" amplitude
-  double avg_amp;  
+  value_t avg_amp;  
   
   // the maximum slope
-  double max_slope;
+  value_t max_slope;
 
   // the value at the maximum slope
-  double max_slope_val;
+  value_t max_slope_val;
   
   // the strength of the effect (between 0 and 1)
-  double strength;
+  value_t strength;
   
   // the maximum value by which a sample will be scaled
-  double max_multiplier;
+  value_t max_multiplier;
   
   // the amount of silence (data that wasn't input) left in the buffer (samples).
   size_t silence;

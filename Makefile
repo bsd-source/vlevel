@@ -17,7 +17,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 # User-editable options:
-#
+
 # Using this version is faster, for some reason
 # CXX=g++-2.96
 #
@@ -29,16 +29,16 @@ PREFIX=/usr/local/bin
 
 all: vlevel-bin
 
-vlevel-bin: volumeleveler.o commandline.o vlevel-bin.o	
+vlevel-bin: volumeleveler.o commandline.o vlevel-bin.o vlevel.h
 	$(CXX) $(CXXFLAGS) -o vlevel-bin vlevel-bin.o volumeleveler.o commandline.o
 
-volumeleveler.o: volumeleveler.cpp volumeleveler.h
+volumeleveler.o: volumeleveler.cpp volumeleveler.h vlevel.h
 	$(CXX) $(CXXFLAGS) -c volumeleveler.cpp
 
-vlevel-bin.o: vlevel-bin.cpp volumeleveler.h commandline.h
+vlevel-bin.o: vlevel-bin.cpp volumeleveler.h commandline.h vlevel.h
 	$(CXX) $(CXXFLAGS) -c vlevel-bin.cpp
 
-commandline.o: commandline.cpp commandline.h
+commandline.o: commandline.cpp commandline.h vlevel.h
 	$(CXX) $(CXXFLAGS) -c commandline.cpp
 
 clean:
