@@ -1,21 +1,21 @@
 VLevel 0.3 technical.txt
 
 This is an outline of how VLevel works, which will hopefully be useful
-to anyone who helps develop it.
+to anyone who helps develop it.  (And me in a month.)
 
 Code Layout
 
   The core of VLevel is the VolumeLeveler class.  It contains the
   look-ahead buffer.  It works on blocks of double-precision numbers,
-  called values.  Some number (channels) of values makes up a sample.
-  Many of VolumeLeveler's functions take lengths in samples instead of
-  values, so be careful.
+  called values (value_t).  Some number (channels) of values makes up
+  a sample.  Many of VolumeLeveler's functions take lengths in samples
+  instead of values, so be careful.
 
   vlevel-bin drives the VolumeLeveler class, and also uses CommandLine
   to parse it's options.
 
-  Soon, there will be a script in ruby that makes Ogg, FLAC, and wav
-  files work.
+  Soon, there will be a Ruby script using SOX that makes Ogg, FLAC, and wav
+  files work with a nice drag-n-drop GUI.
 
 General Idea
 

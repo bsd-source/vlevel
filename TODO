@@ -1,12 +1,8 @@
-More extensive testing
+More extensive testing, exotic channel config, feedback on other platforms
 
-Remove ticks
+Modify LADSPA plugin to silence silent data, to remove click when changing buffer size in XMMS.
 
 Optimize for mono and stereo special cases
 
-Test for non-mono and stereo
-
-Make stubs for extra functions
-
-Actually test difference between mono and stereo versions
+Cool FXRuby GUI with SOX
 

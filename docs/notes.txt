@@ -4,7 +4,8 @@ Channels
 
   VLevel abstracts audio into samples, each of which has as many
   values as there are channels, and most of the functions confusingly
-  use samples, but work on arrays of samples * values doubles.
+  accept length in samples, but work on arrays of length (samples *
+  values) doubles.
 
   You'd think this would be inneficient, but it's not.  I tried
   changing the code to just work on arrays of double (which would only
@@ -17,23 +18,19 @@ Channels
   slope = dy / dx) only has to be done half (1 / channels) as often.
 
   The moral is: channels aren't inneficient, don't waste your time
-  abolishing them.  Floating-point probably is, fixed point may be
+  abolishing them.  Floating-point probably is, but fixed point may be
   even more ugly.
+
+  The code currently allows for different functions to be called
+  depending on the number of channels.  For now, the generic code that
+  works for any number of channels is fine, but speed optimization may
+  be possible in the common mono and stereo cases.
+
 
 GCC Versions
 
-  I rewrote this code from my older code, which was less
-  efficient. After getting it runnable, I compared it's speed
-  (compiled with GCC 3.2) with the old binary (compiled with GCC
-  2.96), and it was much slower!
-
-  So, I tried compiling this with GCC 2.96, and lo and behold, it was
-  much faster. No matter which -O, -march, -fast-math and -lm I try,
-  code compiled with GCC 2.96 is at least 3 times faster than code
-  compiled with GCC 3.2.
-
-  With 3.2, my sample takes 30s to process, with 2.96, it takes
-  8s. These GCCs were part of Mandrake 9.0; my CPU is a 2.4gHz P4.
-
-  I'm looking into this, it baffles me for now.
- 
+  I discovered that while GCC 3.2 generates faster code than GCC 2.96,
+  it's iostream implementation is slower by two orders of magnitude.
+  I've changed the code to use FILE*, which is fast in either version,
+  but that's ugly.  I haven't tried other platforms or versions, but I
+  see no reason they wouldn't work.

@@ -18,12 +18,14 @@
 
 # User-editable options:
 
-# Change this to suite your preferences (maybe add -march=cputype)	
+# Change this to suit your preferences (maybe add -march=cputype)	
 CXXFLAGS=-Wall -O3 -fPIC -DPIC -g
-#
+
 # This is where it will be installed
 PREFIX=/usr/local/bin/
 LADSPA_PREFIX=/usr/local/lib/ladspa/
+
+# End of user-editable options
 
 all: vlevel-bin vlevel-ladspa.so
 
@@ -50,6 +52,6 @@ volumeleveler.o: volumeleveler.cpp volumeleveler.h vlevel.h
 vlevel-bin.o: vlevel-bin.cpp volumeleveler.h commandline.h vlevel.h
 	$(CXX) $(CXXFLAGS) -c vlevel-bin.cpp
 
-commandline.o: commandline.cpp commandline.h vlevel.h
+commandline.o: commandline.cpp commandline.h
 	$(CXX) $(CXXFLAGS) -c commandline.cpp
 

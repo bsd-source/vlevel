@@ -1,4 +1,4 @@
-VLevel 0.3 README
+VLevel 0.5 README
 
 What is VLevel?
 
@@ -24,11 +24,12 @@ How do I use VLevel?
   as the format of the raw data.  Type "vlevel-bin --help" for
   details.
 
+  VLevel also works as a LADSPA plugin.  See http://www.ladspa.org for
+a lists of hosts that VLevel can plug into.
+
 What other features are planed?
 
-  The next step is a LADSPA plugin.  This will allow VLevel to plug
-  into XMMS, some command line tools, some audio editors, and any
-  other LADSPA plugin.
+  A Ruby cross-platform GUI drag-n-drop converter that uses SOX.
 
 Can I distribute VLevel?
 

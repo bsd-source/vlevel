@@ -6,6 +6,8 @@ install it, login as root (type "su") and type "make install".
 You can change where it is installed by editing Makefile before doing
 the above.
 
-I test VLevel on a Linux system, but it should build on any unix-like
-system.  When I write the front-end script, I may port it to Windows.
+I test VLevel on a Linux system, but it should build on any similar
+system.  It should compile on Windows, but it won't be very useful
+until I write a Ruby script with a nice cross-platform GUI and SOX
+integration.
 
