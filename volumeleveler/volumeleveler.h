@@ -78,6 +78,7 @@ class VolumeLeveler {
 
 	// get stats
 	value_t GetMultiplier(); 
+	inline value_t GetAverageAmp() { return avg_amp; };
 	
 	// fills the buffers with silence
 	void Flush();
