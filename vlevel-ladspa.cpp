@@ -47,8 +47,8 @@ LADSPA_PortDescriptor vlevel_port_descriptors[] = {
 char *vlevel_port_names[] = {
   "Look-ahead (seconds)",
   "Strength",
-  "Use Maximum Multiplier",
-  "Maximum Multiplier",
+  "Limit Multiplier",
+  "Multiplier Limit",
   "Undo",
   "Current Multiplier",
   "Input 1",
