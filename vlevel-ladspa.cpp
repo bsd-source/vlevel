@@ -18,10 +18,14 @@
 
 // vlevel-ladspa.cpp - the ladspa plugin
 
+#include <iostream>
+
 #include "ladspa.h"
 #include "vlevel.h"
 #include "vlevel-ladspa.h"
 #include "volumeleveler.h"
+
+using namespace std;
 
 // Is there a reason this must be allocated?  It seems to work without it.
 

@@ -26,4 +26,12 @@
 
 typedef float value_t;
 
+#define VLEVEL_ABS(x) fabsf(x)
+
+// same speed as above
+//#define VLEVEL_ABS(x) ((x) > 0 ? (x) : -(x))
+
+// a bit faster on 2.96, a bit slower(!) on 3.2
+//#define VLEVEL_ABS(x) (x)
+
 #endif // ndef VLEVEL_H

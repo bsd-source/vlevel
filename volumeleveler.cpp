@@ -110,7 +110,7 @@ void VolumeLeveler::Exchange_n(value_t *in_buf, value_t *out_buf, size_t in_samp
       value_t in = in_buf[user_pos * channels + ch];
       out_buf[user_pos * channels + ch] = buf[pos * channels + ch] * multiplier;
       buf[pos * channels + ch] = in;
-      if(fabs(in) > new_val) new_val = fabs(in);
+      if(VLEVEL_ABS(in) > new_val) new_val = fabs(in);
     }
 
     pos = (pos + 1) % samples; // now pos is the oldest, new one is pos-1
@@ -123,7 +123,7 @@ void VolumeLeveler::Exchange_n(value_t *in_buf, value_t *out_buf, size_t in_samp
       for(size_t i = 1; i < samples; ++i) {
 	value_t sample_val = 0; // buf[pos+i].GetMax()
 	for(size_t ch = 0; ch < channels; ++ch) {
-	  value_t ch_val = fabs(buf[((pos + i) % samples) * channels + ch]);
+	  value_t ch_val = VLEVEL_ABS(buf[((pos + i) % samples) * channels + ch]);
 	  if(ch_val > sample_val) sample_val = ch_val;
 	}
 	value_t slope = (sample_val - avg_amp) / i;
