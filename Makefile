@@ -22,12 +22,26 @@
 # CXX=g++-2.96
 #
 # Change this to suite your preferences (maybe add -march=cputype)	
-CXXFLAGS=-Wall -O3
+CXXFLAGS=-Wall -O3 -fPIC -DPIC
 #
 # This is where it will be installed
 PREFIX=/usr/local/bin
+LADSPA_PREFIX=/usr/local/lib/ladspa
 
-all: vlevel-bin
+all: vlevel-bin vlevel-ladspa.so
+
+install: all
+	cp -f vlevel-bin $(PREFIX)
+	cp -f vlevel-ladspa.so $(LADSPA_PREFIX)
+
+clean:
+	rm -f *.o vlevel-bin vlevel-ladspa.so
+
+vlevel-ladspa.so: vlevel-ladspa.o volumeleveler.o
+	$(CXX) $(CXXFLAGS) -shared -o vlevel-ladspa.so vlevel-ladspa.o volumeleveler.o
+
+vlevel-ladspa.o: vlevel-ladspa.cpp volumeleveler.h vlevel-ladspa.h vlevel.h ladspa.h
+	$(CXX) $(CXXFLAGS) -c vlevel-ladspa.cpp
 
 vlevel-bin: volumeleveler.o commandline.o vlevel-bin.o vlevel.h
 	$(CXX) $(CXXFLAGS) -o vlevel-bin vlevel-bin.o volumeleveler.o commandline.o
@@ -41,8 +55,3 @@ vlevel-bin.o: vlevel-bin.cpp volumeleveler.h commandline.h vlevel.h
 commandline.o: commandline.cpp commandline.h vlevel.h
 	$(CXX) $(CXXFLAGS) -c commandline.cpp
 
-clean:
-	rm -f *.o vlevel-bin
-
-install: all
-	cp -f vlevel-bin $(PREFIX)

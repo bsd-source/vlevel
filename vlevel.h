@@ -21,6 +21,9 @@
 #ifndef VLEVEL_H
 #define VLEVEL_H
 
-typedef double value_t;
+// Float actually is slightly less accurate (900/65536 in my tests),
+// but is needed by LADSPA.
+
+typedef float value_t;
 
 #endif // ndef VLEVEL_H
