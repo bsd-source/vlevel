@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // vlevel_wrapper.cpp - this file is part of vlevel winamp plugin 0.1
-// Copyright (C) 2003  Markus Sablatnig
+// Copyright (C) 2003 Markus Sablatnig
+// Copyright (C) 2003 Tom Felker
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -26,89 +27,90 @@
 #include "vlevel_wrapper.h"
 
 CVLWrapper::CVLWrapper()
-	: ms_channels(2), ms_samples(44100*5), ms_rate(44100), mv_length(5),
-	mv_strength(static_cast<value_t>(0.8)), mv_maxMultiplier(25),
-	mb_samplesChanged(false), mb_strengthChanged(false), mb_maxMultiplierChanged(false),
-	mpvl_wrapped(0)
+	: ms_channels(2), ms_samples(44100), ms_rate(44100), mv_length(1),
+	mv_strength(0.8), mv_maxMultiplier(25),	mb_samplesChanged(false),
+	mb_strengthChanged(false), mb_maxMultiplierChanged(false), mpvl_wrapped(0)
 {
-	mpvl_wrapped	=	new VolumeLeveler(ms_samples, ms_channels, mv_strength, mv_maxMultiplier);
-	// Wow, you'd think a failed new would throw an exception on it's own.	--Tom
-	if( !mpvl_wrapped )
+	mpvl_wrapped = new VolumeLeveler(ms_samples, ms_channels, mv_strength, mv_maxMultiplier);
+	
+	// I'm surprised this isn't automatic.
+	if(!mpvl_wrapped)
 		throw std::bad_alloc();
-}//CVLWrapper::CVLWrapper
+} // CVLWrapper::CVLWrapper
 
 CVLWrapper::~CVLWrapper()
 {
-	delete mpvl_wrapped;	
+	delete mpvl_wrapped;
+	// TODO: when I cache the buffer allocations, I must delete them here.
 }
 
-void CVLWrapper::SetCachedChannels( size_t s_channels )
+void CVLWrapper::SetCachedChannels(size_t s_channels)
 {
 	assert(s_channels > 0);
 	if(ms_channels != s_channels) {
 		ms_channels = s_channels;
-		mb_channelsChanged = true;
+		mb_samplesOrChannelsChanged = true;
 	}
-}//CVLWrapper::SetCachedChannels
+} // CVLWrapper::SetCachedChannels
 
-void CVLWrapper::SetCachedSamples( size_t s_samples )
+void CVLWrapper::SetCachedStrength(value_t v_strength)
 {	
-	assert(s_samples > 1);
-	if(ms_samples != s_samples) {
-		ms_samples = s_samples;
-		mb_samplesChanged = true;
-	}
-}//CVLWrapper::SetCachedSamples
+	mv_strength = v_strength;
+	mb_strengthChanged = true;
+} // CVLWrapper::SetCachedStrength
 
-void CVLWrapper::SetCachedStrength( value_t v_strength )
+void CVLWrapper::SetCachedMaxMultiplier(value_t v_maxMultiplier)
 {	
-	mv_strength			=	v_strength;
-	mb_strengthChanged	=	true;
-}//CVLWrapper::SetCachedStrength
-
-void CVLWrapper::SetCachedMaxMultiplier( value_t v_maxMultiplier )
-{	
-	mv_maxMultiplier		=	v_maxMultiplier;
-	mb_maxMultiplierChanged	=	true;
-}//CVLWrapper::SetCachedMaxMultiplier
+	mv_maxMultiplier = v_maxMultiplier;
+	mb_maxMultiplierChanged = true;
+} // CVLWrapper::SetCachedMaxMultiplier
 
 void CVLWrapper::SetCachedLength(value_t v_length)
 {
 	mv_length = v_length;
 	SetCachedSamples(GetCachedLength() * GetCachedRate());
-}//CVLWrapper::SetCachedLength
+} // CVLWrapper::SetCachedLength
 
 void CVLWrapper::SetCachedRate(size_t s_rate)
 {
 	ms_rate = s_rate;
+	ms_samples = mv_length * ms_rate;
+	
 	SetCachedSamples(GetCachedLength() * GetCachedRate());
-}//CVLWrapper::SetCachedRate
+} // CVLWrapper::SetCachedRate
 
+// Don't call this unless you've just computed s_amples from mv_length and ms_rate.
+void CVLWrapper::SetCachedSamples(size_t s_samples)
+{	
+	assert(s_samples > 1);
+	if(ms_samples != s_samples) {
+		ms_samples = s_samples;
+		mb_samplesOrChannelsChanged = true;
+	}
+} // CVLWrapper::SetCachedSamples
 
-void CVLWrapper::CacheFlush( void )
+void CVLWrapper::CacheFlush()
 {
-	if( mb_samplesChanged || mb_channelsChanged )
+	if( mb_samplesOrChannelsChanged)
 	{
-		mpvl_wrapped->SetSamplesAndChannels( ms_samples, ms_channels );
-		mb_samplesChanged	=	false;
-		mb_channelsChanged	=	false;
-	}//if
+		mpvl_wrapped->SetSamplesAndChannels(ms_samples, ms_channels);
+		mb_samplesOrChannelsChanged = false;
+	} // if
 
 	if( mb_strengthChanged )
 	{
-		mpvl_wrapped->SetStrength( mv_strength );
-		mb_strengthChanged	=	false;
-	}//if
+		mpvl_wrapped->SetStrength(mv_strength);
+		mb_strengthChanged = false;
+	} // if
 
-	if( mb_maxMultiplierChanged )
+	if(mb_maxMultiplierChanged)
 	{
-		mpvl_wrapped->SetMaxMultiplier( mv_maxMultiplier );
+		mpvl_wrapped->SetMaxMultiplier(mv_maxMultiplier);
 		SetCachedMaxMultiplier(mpvl_wrapped->GetMaxMultiplier()); // turns negative mms to HUGE_VAL
-		mb_maxMultiplierChanged	=	false;
-	}//if
-}//CVLWrapper::CacheFlush
+		mb_maxMultiplierChanged = false;
+	} // if
+} // CVLWrapper::CacheFlush
 
-//XXX: untested, but it might work.
 int CVLWrapper::Exchange(void *raw_buf, int samples, int bits_per_value, int channels, int rate)
 {
 	SetCachedChannels(channels);
@@ -117,43 +119,42 @@ int CVLWrapper::Exchange(void *raw_buf, int samples, int bits_per_value, int cha
 	
 	size_t values = samples * channels;
 	
-	// all of these allocations could be cached if necessary for performance
-	// this buffer holds interleaved value_t data
+	// TODO: cache these allocations for performance.
+	// This buffer holds interleaved value_t data.
 	value_t *raw_value_buf = new value_t[values];
-	// allocate our per-channel value_t buffers
-	// this is the formate VolumeLeveler requires
+	// Allocate our per-channel value_t buffers.
+	// This is the format VolumeLeveler requires.
 	value_t **bufs = new value_t*[channels];
 	for(size_t ch = 0; ch < channels; ++ch)
 		bufs[ch] = new value_t[samples];
 	
-	// takes data from supplied integer raw_buf to allocated value_t interleaved raw_value_buf
-	ToValues((char *)raw_buf, raw_value_buf, values, bits_per_value, true); // true means data is signed
+	// Take data from supplied integer raw_buf to allocated value_t interleaved raw_value_buf.
+	ToValues((char *)raw_buf, raw_value_buf, values, bits_per_value, true); // true because data is signed.
 	
-	// de-interleave the data
+	// De-interleave the data.
 	for(size_t s = 0; s < samples; ++s)
 		for(size_t ch = 0; ch < channels; ++ch)
 			bufs[ch][s] = raw_value_buf[s * channels + ch];
 	
+	// Perform the effect.
+	// silence_samples is how many samples at the beginning of the returned buffer
+	// are silent because the real data hasn't worked through VLevel's buffer yet.
 	size_t silence_samples = mpvl_wrapped->Exchange(bufs, bufs, samples);
+	
 	size_t good_samples = samples - silence_samples;
 	size_t good_values = good_samples * channels;
 
-	// To improve the delay when first playing a song:
-	// I should shift the data left (cutting off the beginning of the buffer) by silence_samples,
-	// and return a correspondingly lesser value.
-	
-	// re-interleave the data
-	// Visual C++ improperly lets the s defined above persist outside that loop
-	// Notice that leading silence_samples are stripped.
+	// Re-interleave the data.
+	// Visual C++ improperly lets the s defined above persist outside that loop.
+	// Notice that leading silence_samples are stripped and good data is shifted.
 	for(/* size_t */ s = 0; s < good_samples; ++s)
 		for(size_t ch = 0; ch < channels; ++ch)
 			raw_value_buf[s * channels + ch] = bufs[ch][s + silence_samples];
 	
-	// put it back into the supplied integer buffer.
+	// Put the good data back into the supplied integer buffer.
 	FromValues(raw_value_buf, (char *)raw_buf, good_values, bits_per_value, true);
 	
-
-	// deallocate our buffers:
+	// Deallocate our buffers.
 	for(/* size_t */ ch = 0; ch < channels; ++ch)
 		delete [] bufs[ch];
 	delete [] bufs;
@@ -161,7 +162,7 @@ int CVLWrapper::Exchange(void *raw_buf, int samples, int bits_per_value, int cha
 
 	// Winamp is sloppy about using int when size_t is correct.  Oh, well.	
 	// dsp.h says we shouldn't return less than half as many samples as we're given,
-	// but returning 0 seems to work OK.	
+	// but returning 0 seems to work fine.	
 	return good_samples;	
-}//CVLWrapper::Exchange
+} // CVLWrapper::Exchange
 

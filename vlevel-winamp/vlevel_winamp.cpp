@@ -41,12 +41,12 @@ void quit(struct winampDSPModule *this_mod);
 int modify_samples(struct winampDSPModule *this_mod, short int *samples, int numsamples, int bps, int nch, int srate);
 
 // Module header, includes version, description, and address of the module retriever function
-winampDSPHeader hdr = { DSP_HDRVER, "VLevel Winamp plugin test", getModule };
+winampDSPHeader hdr = { DSP_HDRVER, "VLevel-Winamp v0.2 - an automatic volume leveler", getModule };
 
 // first module
 winampDSPModule mod =
 {
-	"foobar",
+	"VLevel-Winamp v0.2",
 	NULL,	// hwndParent
 	NULL,	// hDllInstance
 	config,
@@ -78,8 +78,7 @@ winampDSPModule *getModule(int which)
 
 void config(struct winampDSPModule *this_mod)
 {
-	MessageBox(this_mod->hwndParent,"Hello world!",
-									"TestMsg",MB_OK);
+	MessageBox(this_mod->hwndParent,"Hello world!",	"TestMsg",MB_OK);
 }
 
 int init(struct winampDSPModule *this_mod)
@@ -91,10 +90,11 @@ int init(struct winampDSPModule *this_mod)
 		pvlw_userData	=	new CVLWrapper;
 		if( !pvlw_userData )
 			return 1;
-
-		//read values from registry and set (or read first and construct using them)
-
 		this_mod->userData	=	static_cast<void*>(pvlw_userData);
+
+		// TODO: read values from the ini file. 
+		// dsp.h says configuration data should be stored in <dll directory>\plugin.ini
+		
 	}//try
 	catch(...)
 	{
@@ -117,10 +117,16 @@ void quit(struct winampDSPModule *this_mod)
 
 int modify_samples(struct winampDSPModule *this_mod, short int *samples, int numsamples, int bps, int nch, int srate)
 {
-	// Note - this code is untested, but it should capture the gist of things.
-	
 	assert(this_mod && this_mod->userData);
-	
-	// Exchange automatically flushes
 	return ((CVLWrapper *)(this_mod->userData))->Exchange((void *)samples, numsamples, bps, nch, srate);
 }
+
+// TODO: ...but maybe impossible.
+// We could elimate the delay caused by seeking if we flushed VLevel's internal buffer
+// before seeking.  So if there's a way to intercept a seek, set a flag, and flush 
+// the VolumeLeveler on the next modify_samples, it would be better.
+
+// TODO: ...but almost certainly impossible.
+// I think there will be an issue with the last buffer-ful of the song being discarded.
+// We can eliminate this if there was a way to instruct the host to call modify_samples
+// until it returns zero.  I can dream, can't I?
