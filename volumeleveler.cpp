@@ -44,35 +44,15 @@ void VolumeLeveler::SetStrength(value_t s)
   strength = s;
 }
 
-value_t VolumeLeveler::GetStrength()
-{
-  return strength;
-}
-
 void VolumeLeveler::SetMaxMultiplier(value_t m)
 {
   if(m <= 0) m = HUGE_VAL;
   max_multiplier = m;
 }
 
-value_t VolumeLeveler::GetMaxMultiplier()
-{
-  return max_multiplier;
-}
-
-size_t VolumeLeveler::GetSamples()
-{
-  return samples;
-}
-
-size_t VolumeLeveler::GetChannels()
-{
-  return channels;
-}
-
 void VolumeLeveler::SetSamplesAndChannels(size_t s, size_t c)
 {
-  assert(s > 0 && c > 0);
+  assert(s > 1 && c > 0);
   delete [] buf;
   buf = new value_t[s * c];
   samples = s;
@@ -88,12 +68,30 @@ void VolumeLeveler::Flush()
   max_slope = max_slope_val = avg_amp = 0;
 }
 
-size_t VolumeLeveler::GetSilence()
+size_t VolumeLeveler::Exchange(value_t *user_buf, size_t user_samples)
 {
-  return silence;
+  switch(channels) {
+  //case 1:
+  //  Exchange_1(user_buf, user_samples);
+  //  break;
+  //case 2:
+  //  Exchange_2(user_buf, user_samples);
+  //  break;
+  default:
+    Exchange_n(user_buf, user_samples);
+  }
+
+  if(silence >= user_samples) {
+    silence -= user_samples;
+    return user_samples;
+  } else {
+    size_t returned_silence = silence;
+    silence = 0;
+    return returned_silence;
+  }
 }
 
-size_t VolumeLeveler::Exchange(value_t *user_buf, size_t user_samples)
+void VolumeLeveler::Exchange_n(value_t *user_buf, size_t user_samples)
 {
   // for each user_pos in user_buf
   for(size_t user_pos = 0; user_pos < user_samples; ++user_pos) {
@@ -138,8 +136,8 @@ size_t VolumeLeveler::Exchange(value_t *user_buf, size_t user_samples)
       // only chance of higher slope is the new sample
      
       // recomputing max_slope isn't really necessary...
-      //max_slope = (max_slope_val - avg_amp) / ((max_slope_pos - pos + samples) % samples);
-      // TODO: assert that above was NOP and remove if so
+      max_slope = (max_slope_val - avg_amp) / ((max_slope_pos - pos + samples) % samples);
+      // ...but it doesn't take long and has a small effect.
 
       value_t slope = (new_val - avg_amp) / (samples - 1);
       
@@ -148,19 +146,7 @@ size_t VolumeLeveler::Exchange(value_t *user_buf, size_t user_samples)
 	max_slope = slope;
 	max_slope_val = new_val;
       }
-      
     }
-    
-  }
-  // compute silence stuff
-  
-  if(silence >= user_samples) {
-    silence -= user_samples;
-    return user_samples;
-  } else {
-    size_t returned_silence = silence;
-    silence = 0;
-    return returned_silence;
   }
 }
 

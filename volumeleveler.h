@@ -41,29 +41,31 @@ public:
   // Reallocates a buffer of l samples and c channels (contents are lost)
   void SetSamplesAndChannels(size_t l, size_t c);
 
-  // get samples and number of channels
-  size_t GetSamples();
-  size_t GetChannels();
-
   // set and get the strength (between 0 and 1) (set doesn't affect the buffer)
   void SetStrength(value_t s);
-  value_t GetStrength();
-
+  
   // set and get the max multiplier (set doesn't affect the buffer)
   void SetMaxMultiplier(value_t m);
-  value_t GetMaxMultiplier();
 
+  // get stuff
+  inline size_t GetSamples() { return samples; };
+  inline size_t GetChannels() { return channels; };
+  inline value_t GetStrength() { return strength; };
+  inline value_t GetMaxMultiplier() { return max_multiplier; };
+  inline size_t GetSilence() { return silence; };
+  
   // fills the buffers with silence
   void Flush();
-
-  // how many samples are slient from Flush, not filled by input.
-  size_t GetSilence();
 
   // replaces raw with processed, returns how many samples are
   // residual silence from when the buffers were empty.
   size_t Exchange(value_t *user_buf, size_t user_samples);
   
 private:
+
+  //void Exchange_1(value_t *user_buf, size_t user_samples);
+  //void Exchange_2(value_t *user_buf, size_t user_samples);
+  void Exchange_n(value_t *user_buf, size_t user_samples);
 
   // the buffer
   value_t *buf;
@@ -73,7 +75,16 @@ private:
 
   // the number of atoms per channel
   size_t channels;
+    
+  // the strength of the effect (between 0 and 1)
+  value_t strength;
   
+  // the maximum value by which a sample will be scaled
+  value_t max_multiplier;
+  
+  // the amount of silence (data that wasn't input) left in the buffer (samples).
+  size_t silence;
+
   // position about to be returned (samples)
   size_t pos;
   
@@ -89,14 +100,6 @@ private:
   // the value at the maximum slope
   value_t max_slope_val;
   
-  // the strength of the effect (between 0 and 1)
-  value_t strength;
-  
-  // the maximum value by which a sample will be scaled
-  value_t max_multiplier;
-  
-  // the amount of silence (data that wasn't input) left in the buffer (samples).
-  size_t silence;
 };
 
 #endif // ndef VOLUMELEVELER_H
