@@ -1,0 +1,12 @@
+More extensive testing
+
+Remove ticks
+
+Optimize for mono and stereo special cases
+
+Test for non-mono and stereo
+
+Make stubs for extra functions
+
+Actually test difference between mono and stereo versions
+

@@ -39,6 +39,8 @@ LADSPA_PortDescriptor vlevel_port_descriptors[] = {
   LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL,
   LADSPA_PORT_OUTPUT | LADSPA_PORT_CONTROL,
   LADSPA_PORT_INPUT | LADSPA_PORT_AUDIO,
+  LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO,
+  LADSPA_PORT_INPUT | LADSPA_PORT_AUDIO,
   LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO
 };
 
@@ -49,8 +51,10 @@ char *vlevel_port_names[] = {
   "Maximum Multiplier",
   "Undo",
   "Current Multiplier",
-  "Input",
-  "Output"
+  "Input 1",
+  "Output 1",
+  "Input 2",
+  "Output 2"
 };
 
 // Why can't I just specify the default, instead of _LOW _HIGH masks?
@@ -86,24 +90,68 @@ LADSPA_PortRangeHint vlevel_port_range_hints[] = {
     0, 20  
   },
   { 0, 0, 0 },
-  { 0, 0, 0 }  
+  { 0, 0, 0 },
+  { 0, 0, 0 },
+  { 0, 0, 0 }
 };
 
-LADSPA_Descriptor vlevel_descriptor = {
+LADSPA_Descriptor vlevel_descriptor_mono = {
   // UniqueID
-  1981,
+  UID_MONO,
   // Label
-  "vlevel",
+  "vlevel_mono",
   // Properties
   0,
   // Name
-  "VLevel",
+  "VLevel (Mono)",
   // Maker
   "Tom Felker",
   // Copyright
   "GPL",
   // PortCount
-  PORT_COUNT,
+  CONTROL_PORT_COUNT + 2,
+  // PortDescriptors
+  vlevel_port_descriptors,
+  // PortNames
+  vlevel_port_names,
+  // PortRangeHints
+  vlevel_port_range_hints,
+  // ImplementationData
+  0,
+  // instantiate
+  Instantiate,
+  // connect_port
+  ConnectPort,
+  // activate
+  Activate,
+  // run
+  Run,
+  // run_adding
+  0,
+  // set_run_adding_gain
+  0,
+  // deactivate
+  Deactivate,
+  // cleanup
+  Cleanup
+};
+
+
+LADSPA_Descriptor vlevel_descriptor_stereo = {
+  // UniqueID
+  UID_STEREO,
+  // Label
+  "vlevel_stereo",
+  // Properties
+  0,
+  // Name
+  "VLevel (Stereo)",
+  // Maker
+  "Tom Felker",
+  // Copyright
+  "GPL",
+  // PortCount
+  CONTROL_PORT_COUNT + 4,
   // PortDescriptors
   vlevel_port_descriptors,
   // PortNames
@@ -132,62 +180,107 @@ LADSPA_Descriptor vlevel_descriptor = {
 
 const LADSPA_Descriptor *ladspa_descriptor(unsigned long index)
 {
-  if(index != 0) return 0;
-  return &vlevel_descriptor;
+  switch(index) {
+  case 0:
+    return &vlevel_descriptor_mono;
+  case 1:
+    return &vlevel_descriptor_stereo;
+  default:
+    return 0;
+  }
 }
+
+
+VLevelInstance::VLevelInstance(size_t channels, unsigned long rate):
+  vl(2, channels), nch(channels), sample_rate(rate)
+{
+  ports = new value_t*[CONTROL_PORT_COUNT + 2 * nch];
+  in = new value_t*[nch];
+  out = new value_t*[nch];
+}
+
+VLevelInstance::~VLevelInstance()
+{
+  delete [] ports;
+  delete [] in;
+  delete [] out;
+}
+void VLevelInstance::ConnectPort(unsigned long port, value_t *data_location)
+{
+  ports[port] = data_location;
+  
+  if(port >= CONTROL_PORT_COUNT) // is a control port
+    if((port - CONTROL_PORT_COUNT) % 2 == 0) // is an input port
+      in[(port - CONTROL_PORT_COUNT) / 2] = data_location;
+    else if((port - CONTROL_PORT_COUNT) % 2 == 1) // is an output port
+      out[(port - CONTROL_PORT_COUNT) / 2] = data_location;
+}
+
+void VLevelInstance::Activate()
+{
+  vl.Flush();
+}
+
+void VLevelInstance::Run(unsigned long sample_count)
+{
+  
+  size_t samples = (size_t) (*ports[CONTROL_PORT_LOOK_AHEAD] * sample_rate);
+  if(samples != vl.GetSamples()) {
+    if(samples > 60 * sample_rate) samples = 60 * sample_rate;
+    if(samples < 2) samples = 2;
+    vl.SetSamplesAndChannels(samples, nch);
+  }
+
+  if(*ports[CONTROL_PORT_USE_MAX_MULTIPLIER] > 0) {
+    vl.SetMaxMultiplier(*ports[CONTROL_PORT_MAX_MULTIPLIER]);
+  } else {
+    vl.SetMaxMultiplier(-1);
+  }
+  
+  value_t strength = *ports[CONTROL_PORT_STRENGTH];
+  if(*ports[CONTROL_PORT_UNDO] > 0)
+    strength /= (strength - 1);
+  vl.SetStrength(strength);
+  
+  vl.Exchange(in, out, sample_count);
+  
+  *ports[CONTROL_PORT_OUTPUT_MULTIPLIER] = vl.GetMultiplier();
+}
+
+void VLevelInstance::Deactivate() {}
 
 LADSPA_Handle Instantiate(const LADSPA_Descriptor *descriptor, unsigned long sample_rate)
 {
-  VLevelInstance *pvli = new VLevelInstance;
-  pvli->sample_rate = sample_rate;
-  return (LADSPA_Handle)pvli;
+  switch(descriptor->UniqueID) {
+  case UID_MONO:
+    return (LADSPA_Handle)new VLevelInstance(1, sample_rate);
+  case UID_STEREO:
+    return (LADSPA_Handle)new VLevelInstance(2, sample_rate);  
+  }
+  return 0;
 }
 
 void ConnectPort(LADSPA_Handle instance, unsigned long port, value_t *data_location)
 {
-  VLevelInstance *pvli = (VLevelInstance *)instance;
-  pvli->ports[port] = data_location;
+  ((VLevelInstance *)instance)->ConnectPort(port, data_location);
 }
 
 void Activate(LADSPA_Handle instance)
 {
-  VLevelInstance *pvli = (VLevelInstance *)instance;
-  pvli->vl.Flush(); 
+  ((VLevelInstance *)instance)->Activate(); 
 }
 
 void Run(LADSPA_Handle instance, unsigned long sample_count)
 {
-  VLevelInstance *pvli = (VLevelInstance *)instance;
-  
-  unsigned int samples = (unsigned int)(*pvli->ports[PORT_CONTROL_LOOK_AHEAD] * pvli->sample_rate);
-  if(samples != pvli->vl.GetSamples()) {
-    if(samples > 60 * pvli->sample_rate) samples = 60 * pvli->sample_rate;
-    if(samples < 2) samples = 2;
-    pvli->vl.SetSamplesAndChannels(samples, 1);
-  }
-
-  pvli->vl.SetStrength(*pvli->ports[PORT_CONTROL_STRENGTH]);
-
-  if(*pvli->ports[PORT_CONTROL_USE_MAX_MULTIPLIER] > 0) {
-    pvli->vl.SetMaxMultiplier(*pvli->ports[PORT_CONTROL_MAX_MULTIPLIER]);
-  } else {
-    pvli->vl.SetMaxMultiplier(-1);
-  }
-  
-  if(*pvli->ports[PORT_CONTROL_UNDO] > 0) {
-    value_t strength = pvli->vl.GetStrength();
-    pvli->vl.SetStrength(strength / (strength - 1));
-  }  
-
-  pvli->vl.Exchange(&pvli->ports[PORT_INPUT1], &pvli->ports[PORT_OUTPUT1], sample_count);
-  
-  *pvli->ports[PORT_OUTPUT_MULTIPLIER] = pvli->vl.GetMultiplier();
+  ((VLevelInstance *)instance)->Run(sample_count);
 }
 
-void Deactivate(LADSPA_Handle instance){}
+void Deactivate(LADSPA_Handle instance)
+{
+  ((VLevelInstance *)instance)->Deactivate();
+}
 
 void Cleanup(LADSPA_Handle instance)
 {
-  VLevelInstance *pvli = (VLevelInstance *)instance;
-  delete pvli;
+  delete (VLevelInstance *)instance;  
 }
