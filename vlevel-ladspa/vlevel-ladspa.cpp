@@ -21,10 +21,9 @@
 
 #include <iostream>
 
+#include "../volumeleveler/volumeleveler.h"
 #include "ladspa.h"
-#include "vlevel.h"
 #include "vlevel-ladspa.h"
-#include "volumeleveler.h"
 
 using namespace std;
 

@@ -29,8 +29,7 @@
 #include <limits.h>
 #include <assert.h>
 
-#include "vlevel.h"
-#include "volumeleveler.h"
+#include "../volumeleveler/volumeleveler.h"
 #include "commandline.h"
 
 using namespace std;

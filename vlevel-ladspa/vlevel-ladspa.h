@@ -24,9 +24,9 @@
 
 #include <sys/types.h>
 
-#include "vlevel.h"
+#include "../volumeleveler/volumeleveler.h"
+
 #include "ladspa.h"
-#include "volumeleveler.h"
 
 typedef LADSPA_Data value_t;
 

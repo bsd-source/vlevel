@@ -20,39 +20,35 @@
 # User-editable options:
 
 # Change this to suit your preferences (maybe add -march=cputype)	
-CXXFLAGS=-Wall -O3 -fPIC -DPIC -g
+export CXXFLAGS = -Wall -O3 -fPIC -DPIC -g
 
 # This is where it will be installed
-PREFIX=/usr/local/bin/
-LADSPA_PREFIX=/usr/local/lib/ladspa/
+export PREFIX = /usr/local/
+export LADSPA_PATH = $(PREFIX)/lib/ladspa/
 
 # End of user-editable options.
 
-all: vlevel-bin vlevel-ladspa.so
+# Note: this probably isn't the best way to have one makefile for
+# source in several directories.  Someday I'll figure out automake.
+# Writing Makefiles always makes me feel like I'm reinventing the
+# wheel.
+
+# This is evil, but it makes implicit link rules use g++, not gcc
+export CC = $(CXX)
+
+.PHONY: all install clean
+
+all:
+	make -C volumeleveler all
+	make -C vlevel-bin all
+	make -C vlevel-ladspa all
 
 install: all
-	cp -f vlevel-bin $(PREFIX)
-	mkdir -p $(LADSPA_PREFIX)
-	cp -f vlevel-ladspa.so $(LADSPA_PREFIX)
+	make -C volumeleveler install
+	make -C vlevel-bin install
+	make -C vlevel-ladspa install
 
 clean:
-	rm -f *.o vlevel-bin vlevel-ladspa.so
-
-vlevel-ladspa.so: vlevel-ladspa.o volumeleveler.o
-	$(CXX) $(CXXFLAGS) -shared -o vlevel-ladspa.so vlevel-ladspa.o volumeleveler.o
-
-vlevel-ladspa.o: vlevel-ladspa.cpp volumeleveler.h vlevel-ladspa.h vlevel.h ladspa.h
-	$(CXX) $(CXXFLAGS) -c vlevel-ladspa.cpp
-
-vlevel-bin: volumeleveler.o commandline.o vlevel-bin.o vlevel.h
-	$(CXX) $(CXXFLAGS) -o vlevel-bin vlevel-bin.o volumeleveler.o commandline.o
-
-volumeleveler.o: volumeleveler.cpp volumeleveler.h vlevel.h
-	$(CXX) $(CXXFLAGS) -c volumeleveler.cpp
-
-vlevel-bin.o: vlevel-bin.cpp volumeleveler.h commandline.h vlevel.h
-	$(CXX) $(CXXFLAGS) -c vlevel-bin.cpp
-
-commandline.o: commandline.cpp commandline.h
-	$(CXX) $(CXXFLAGS) -c commandline.cpp
-
+	make -C volumeleveler clean
+	make -C vlevel-bin clean
+	make -C vlevel-ladspa clean
