@@ -18,9 +18,6 @@
 
 # User-editable options:
 
-# Using this version is faster, for some reason
-# CXX=g++-2.96
-#
 # Change this to suite your preferences (maybe add -march=cputype)	
 CXXFLAGS=-Wall -O3 -fPIC -DPIC -g
 #

@@ -23,6 +23,8 @@
 #include <string>
 #include <sstream>
 
+#include <stdio.h>
+
 #include <limits.h>
 #include <assert.h>
 
@@ -61,7 +63,7 @@ void FromValues(value_t *in, char *out, size_t values, unsigned int bits_per_val
   }
 }
 
-void LevelRaw(istream &in, ostream& out, VolumeLeveler &vl, unsigned int bits_per_value)
+void LevelRaw(FILE *in, FILE *out, VolumeLeveler &vl, unsigned int bits_per_value)
 {
   assert(bits_per_value % 8 == 0);
   
@@ -86,10 +88,9 @@ void LevelRaw(istream &in, ostream& out, VolumeLeveler &vl, unsigned int bits_pe
   // how much from the front of the buffer should be ignored
   size_t silence_values, silence_samples;
 
-  while(in) {
+  while(!ferror(in) && !feof(in)) {
     // read and convert to value_t
-    in.read(raw_buf, bytes);
-    good_values = in.gcount() / bytes_per_value;
+    good_values = fread(raw_buf, bytes_per_value, values, in);
     good_samples = good_values / channels;
     ToValues(raw_buf, raw_value_buf, good_values, bits_per_value);
 
@@ -111,7 +112,7 @@ void LevelRaw(istream &in, ostream& out, VolumeLeveler &vl, unsigned int bits_pe
     
     // write the data
     FromValues(&raw_value_buf[silence_values], raw_buf, good_values, bits_per_value);
-    out.write(raw_buf, good_values * bytes_per_value);
+    fwrite(raw_buf, bytes_per_value, good_values, out);
   }
 
   // silence the data
@@ -131,7 +132,7 @@ void LevelRaw(istream &in, ostream& out, VolumeLeveler &vl, unsigned int bits_pe
       raw_value_buf[s * channels + ch] = bufs[ch][s];
     
   FromValues(&raw_value_buf[silence_values], raw_buf, good_values, bits_per_value);
-  out.write(raw_buf, good_values * bytes_per_value);
+  fwrite(raw_buf, bytes_per_value, good_values, out);
 
   delete [] raw_buf;
   delete [] raw_value_buf;
@@ -252,6 +253,6 @@ int main(int argc, char *argv[])
        << "max_multiplier: " << max_multiplier << endl;
   
   VolumeLeveler l(length, channels, strength, max_multiplier);
-  LevelRaw(cin, cout, l, 16);
+  LevelRaw(stdin, stdout, l, 16);
   return 0;
 }
