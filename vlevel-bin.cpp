@@ -124,7 +124,8 @@ int main(int argc, char *argv[])
   size_t length = 3 * 44100;
   size_t channels = 2;
   value_t strength = .8, max_multiplier = 20;
-  string infile, outfile, option, argument;
+  bool undo = false;
+  string option, argument;
   
   while(option = cmd.GetOption(), !option.empty()) {
     
@@ -133,9 +134,17 @@ int main(int argc, char *argv[])
         cerr << cmd.GetProgramName() << ": bad or no option for --length" << endl;
         return 2;
       }
+      if(length < 2) {
+	cerr << cmd.GetProgramName() << ": --length must be greater than 1" << endl;
+        return 2;
+      }
     } else if(option == "channels" || option == "c") {
       if((istringstream(cmd.GetArgument()) >> channels).fail()) {
         cerr << cmd.GetProgramName() << ": bad or no option for --channels" << endl;
+        return 2;
+      }
+      if(channels < 1) {
+	cerr << cmd.GetProgramName() << ": --channels must be greater than 0" << endl;
         return 2;
       }
     } else if(option == "strength" || option == "s") {
@@ -143,11 +152,18 @@ int main(int argc, char *argv[])
         cerr << cmd.GetProgramName() << ": bad or no option for --strength" << endl;
         return 2;
       }
-    } else if(option == "max-multiplier" || option == "m") {
-      if((istringstream(cmd.GetArgument()) >> max_multiplier).fail()) {
-        cerr << cmd.GetProgramName() << ": bad or no option for --max-multiplier" << endl;
+      if(strength < 0 || strength > 1) {
+	cerr << cmd.GetProgramName() << ": --strength must be between 0 and 1 inclusive." << endl;
         return 2;
       }
+    } else if(option == "max-multiplier" || option == "m") {
+      if((istringstream(cmd.GetArgument()) >> max_multiplier).fail()) {
+        cerr << cmd.GetProgramName() << ": bad or no option for --max-multiplier" << endl
+	     << cmd.GetProgramName() << ": for no max multiplier, give a negative number" << endl;
+        return 2;
+      }
+    } else if(option == "undo" || option == "u") {
+      undo = true;
     } else if(option == "help" || option == "h") {
       Help();
       return 0;
@@ -157,6 +173,9 @@ int main(int argc, char *argv[])
       return 2;
     }
   }
+  
+  // This works, see docs/technical.txt
+  if(undo) strength = strength / (strength - 1);
   
   cerr << "Beginning VLevel with:" << endl
        << "length: " << length << endl

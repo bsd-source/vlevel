@@ -100,4 +100,53 @@ Math
   output_sample = sample * multiplier
   output_sample = sample * avg_amp ^ (-strength)
 
-  
+Undoing the effect
+
+  If the original values for strength weren't too close to 1, you can
+  undo the VLevel by giving the undo option.  It works by changing
+  strength as shown below.
+
+  When we first leveled, we scaled the amplitudes like so: 
+
+  ideal_amp_db = avg_amp_db * (1 - strength)
+
+  To get that back, we solve for avg_amp_db
+
+  avg_amp_db = ideal_amp_db * 1 / (1 - strength)
+
+  In this pass, however, the original avg_amp_db becomes ideal_amp_db,
+  and the original (1 - strength) becomes 1 / (1 - strength).  Now
+  we skip ahead a bit:
+
+  multiplier = avg_amp ^ (1 - strength) / avg_amp
+
+  Substituting as explained above and continuing:
+
+  multiplier = avg_amp ^ (1 / (1 - strength)) / avg_amp
+  multiplier = avg_amp ^ ((1 / (1 - strength)) - 1)
+  multiplier = avg_amp ^ (strength / (1 - strength))
+
+  But how do we get VLevel to do this?  Well, we can give it any
+  strength, and it does this:
+
+  multiplier = avg_amp ^ -strength
+
+  And we want it to do this:
+
+  multiplier = avg_amp ^ (undo_strength / (1 - undo_strength))
+
+  So...
+
+  -strength = undo_strength / (1 - undo_strength)
+  strength = undo_strength / (undo_strength - 1)
+
+  By choosing strength as above before starting VLevel, we can then
+  undo the first VLevel, with no change to the main algorithm.
+
+  To be totally precise, we'd also have to make a min_multiplier with
+  a value of 1 / orig_max_multiplier, but that would be slow, and does
+  anybody care if we drop the static anyway?
+
+  It's not perfect, probably because avg_amp moves linearly, not
+  logarithmically, so there are some rounding errors.  Someday I might
+  try changing that, but it's a big change.

@@ -40,7 +40,6 @@ VolumeLeveler::~VolumeLeveler()
 
 void VolumeLeveler::SetStrength(value_t s)
 {
-  assert(s >= -1 && s <= 1);
   strength = s;
 }
 

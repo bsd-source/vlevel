@@ -37,11 +37,14 @@ public:
   // maximum multiplier of m
   VolumeLeveler(size_t l = 44100, size_t c = 2, value_t s = .8, value_t m = 25);
   ~VolumeLeveler();
-
-  // Reallocates a buffer of l samples and c channels (contents are lost)
+  
+  // Reallocates a buffer of l samples and c channels (contents are
+  // lost)
   void SetSamplesAndChannels(size_t l, size_t c);
 
-  // set and get the strength (between 0 and 1) (set doesn't affect the buffer)
+  // set and get the strength (between 0 and 1) (set doesn't affect
+  // the buffer) if undo is true, vlevel will do the exact opposite,
+  // so you can remove a vlevel.
   void SetStrength(value_t s);
   
   // set and get the max multiplier (set doesn't affect the buffer)
