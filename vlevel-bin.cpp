@@ -115,7 +115,9 @@ void Help()
        << "\t\tDefault is .8" << endl
        << "\t--max-multiplier num" << endl
        << "\t\tSets the maximum amount a sample will be multiplied" << endl
-       << "\t\tDefault is 20" << endl;
+       << "\t\tDefault is 20" << endl
+       << "\t--undo" << endl
+       << "\t\tReverses the effect of a previous VLevel" << endl;
 }
 
 int main(int argc, char *argv[])
