@@ -20,19 +20,19 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <new>
+#include <assert.h>
 
 #include "..\\volumeleveler\\volumeleveler.h"
 #include "vlevel_wrapper.h"
 
 CVLWrapper::CVLWrapper()
-	: ms_channels(2), ms_samples(44100), ms_rate(44100), mv_length(1),
+	: ms_channels(2), ms_samples(44100*5), ms_rate(44100), mv_length(5),
 	mv_strength(static_cast<value_t>(0.8)), mv_maxMultiplier(25),
 	mb_samplesChanged(false), mb_strengthChanged(false), mb_maxMultiplierChanged(false),
 	mpvl_wrapped(0)
 {
 	mpvl_wrapped	=	new VolumeLeveler(ms_samples, ms_channels, mv_strength, mv_maxMultiplier);
-	
-	// My book says new throws an exception when it fails, so this isn't really necessary:	
+	// Wow, you'd think a failed new would throw an exception on it's own.	--Tom
 	if( !mpvl_wrapped )
 		throw std::bad_alloc();
 }//CVLWrapper::CVLWrapper
@@ -44,16 +44,20 @@ CVLWrapper::~CVLWrapper()
 
 void CVLWrapper::SetCachedChannels( size_t s_channels )
 {
-	assert(s_channels > 0)
-	ms_channels			=	s_channels;
-	mb_channelsChanged	=	true;
+	assert(s_channels > 0);
+	if(ms_channels != s_channels) {
+		ms_channels = s_channels;
+		mb_channelsChanged = true;
+	}
 }//CVLWrapper::SetCachedChannels
 
 void CVLWrapper::SetCachedSamples( size_t s_samples )
 {	
-	assert(samples > 1)
-	ms_samples			=	s_samples;
-	mb_samplesChanged	=	true;
+	assert(s_samples > 1);
+	if(ms_samples != s_samples) {
+		ms_samples = s_samples;
+		mb_samplesChanged = true;
+	}
 }//CVLWrapper::SetCachedSamples
 
 void CVLWrapper::SetCachedStrength( value_t v_strength )
@@ -83,7 +87,7 @@ void CVLWrapper::SetCachedRate(size_t s_rate)
 
 void CVLWrapper::CacheFlush( void )
 {
-	if( mb_samplesChanged || mv_channelsChanged )
+	if( mb_samplesChanged || mb_channelsChanged )
 	{
 		mpvl_wrapped->SetSamplesAndChannels( ms_samples, ms_channels );
 		mb_samplesChanged	=	false;
@@ -105,18 +109,13 @@ void CVLWrapper::CacheFlush( void )
 }//CVLWrapper::CacheFlush
 
 //XXX: untested, but it might work.
-int CVLWrapper::Exchange(void *raw_buf, int values, int bits_per_value, int channels, int rate)
+int CVLWrapper::Exchange(void *raw_buf, int samples, int bits_per_value, int channels, int rate)
 {
 	SetCachedChannels(channels);
 	SetCachedRate(rate);
 	CacheFlush();
 	
-	// I'm not sure exactly what the second param to this function means.
-	// Does it mean the number of samples (16-bit numbers), what I call values?	
-	size_t samples = values / channels;
-	// Or does it mean the number of what I call samples (usually L-R pairs)?
-	// Remember, I use a weird terminology - each sample typically has two values.
-	
+	size_t values = samples * channels;
 	
 	// all of these allocations could be cached if necessary for performance
 	// this buffer holds interleaved value_t data
@@ -128,7 +127,7 @@ int CVLWrapper::Exchange(void *raw_buf, int values, int bits_per_value, int chan
 		bufs[ch] = new value_t[samples];
 	
 	// takes data from supplied integer raw_buf to allocated value_t interleaved raw_value_buf
-	ToValues(raw_buf, raw_value_buf, values, bits_per_value, true); // true means data is signed
+	ToValues((char *)raw_buf, raw_value_buf, values, bits_per_value, true); // true means data is signed
 	
 	// de-interleave the data
 	for(size_t s = 0; s < samples; ++s)
@@ -136,20 +135,33 @@ int CVLWrapper::Exchange(void *raw_buf, int values, int bits_per_value, int chan
 			bufs[ch][s] = raw_value_buf[s * channels + ch];
 	
 	size_t silence_samples = mpvl_wrapped->Exchange(bufs, bufs, samples);
-	
+	size_t good_samples = samples - silence_samples;
+	size_t good_values = good_samples * channels;
+
 	// To improve the delay when first playing a song:
 	// I should shift the data left (cutting off the beginning of the buffer) by silence_samples,
 	// and return a correspondingly lesser value.
 	
 	// re-interleave the data
-	for(size_t s = 0, s < samples, ++s)
+	// Visual C++ improperly lets the s defined above persist outside that loop
+	// Notice that leading silence_samples are stripped.
+	for(/* size_t */ s = 0; s < good_samples; ++s)
 		for(size_t ch = 0; ch < channels; ++ch)
-			raw_value_buf[s * channels + ch] = bufs[ch][s];
+			raw_value_buf[s * channels + ch] = bufs[ch][s + silence_samples];
 	
 	// put it back into the supplied integer buffer.
-	FromValues(raw_value_buf, raw_buf, values, bits_per_value, true);
+	FromValues(raw_value_buf, (char *)raw_buf, good_values, bits_per_value, true);
 	
+
+	// deallocate our buffers:
+	for(/* size_t */ ch = 0; ch < channels; ++ch)
+		delete [] bufs[ch];
+	delete [] bufs;
+	delete [] raw_value_buf;
+
 	// Winamp is sloppy about using int when size_t is correct.  Oh, well.	
-	return samples;	
+	// dsp.h says we shouldn't return less than half as many samples as we're given,
+	// but returning 0 seems to work OK.	
+	return good_samples;	
 }//CVLWrapper::Exchange
 

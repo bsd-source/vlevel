@@ -22,6 +22,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <commctrl.h>
+#include <assert.h>
 #include "dsp.h"
 #include "vlevel_wrapper.h"
 
@@ -121,5 +122,5 @@ int modify_samples(struct winampDSPModule *this_mod, short int *samples, int num
 	assert(this_mod && this_mod->userData);
 	
 	// Exchange automatically flushes
-	return this_mod->userData->Exchange((void *)samples, numsamples, bps, nch, srate);
+	return ((CVLWrapper *)(this_mod->userData))->Exchange((void *)samples, numsamples, bps, nch, srate);
 }

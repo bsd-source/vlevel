@@ -24,7 +24,7 @@
 
 // This is now the only header
 // BTW, I laugh at your OS's backslashes! :-)
-#include "..\\voluemeleveler\\volumeleveler.h"
+#include "..\\volumeleveler\\volumeleveler.h"
 
 //This class is a wrapper for VolumeLeveler.
 //It caches some settings and de-/interlaces
