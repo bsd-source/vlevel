@@ -120,10 +120,10 @@ void LevelRaw(FILE *in, FILE *out, VolumeLeveler &vl, unsigned int bits_per_valu
 
 void Help()
 {
-	cerr << "VLevel v0.5" << endl
+	cerr << "VLevel v0.5.1" << endl
 	     << endl
 	     << "usage:" << endl
-	     << "\tvlevel-bin [options] < infile > outfile" << endl
+	     << "\tvlevel-bin [options] < infile.cdda > outfile.cdda" << endl
 	     << endl
 	     << "options: (abbreviations also work)" << endl
 	     << "\t--length num" << endl
